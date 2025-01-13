@@ -49,6 +49,7 @@ public class Stage : MonoBehaviour
             // 블록이 바닥이나 다른 블록에 닿았을 경우 라인 완성 검사
             if (CheckCollision())
             {
+                // 블록을 해당 위치에 놓기 위해 _previousStepCells를 비움
                 _previousStepCells.Clear();
                 CheckLines();
                 continue;
@@ -100,29 +101,32 @@ public class Stage : MonoBehaviour
 
     private bool CheckCollision()
     {
+        // 현재 블록이 바닥에 닿았는지 확인
+        if (_currentBlockY + _currentBlock.height >= TetrisDefine.TetrisStageRows)
+            return true;
+
         // 현재 블록이 다른 블록에 닿았는지 확인
-        /*for (int i = 0; i < _currentBlock.height; i++)
+        for (int i = 0; i < _currentBlock.height; i++)
         {
-            // 스테이지를 벗어나는 경우 처리
-            int nextLineY = _currentBlockY + i + 1; 
-            if (nextLineY >= TetrisDefine.TetrisStageRows)
-                continue;
-            
+            int nextLineY = _currentBlockY + i + 1;
             int offset = TetrisDefine.TetrisStageCols * nextLineY;
             for (int j = 0; j < TetrisDefine.TetrisBlockCols; j++)
             {
                 if (!_currentBlock.blockShape[(i * TetrisDefine.TetrisBlockCols) + j])
+                    continue;
+
+                /*
+                 * □■□ 왼쪽 블록의 가운데 부분처럼 다음 줄까지 셀이 이어지는 경우 맨 밑 줄의 셀에 대해서만 충돌 검사 진행
+                 *  ■
+                 */
+                if (i + 1 <_currentBlock.height && _currentBlock.blockShape[((i + 1) * TetrisDefine.TetrisBlockCols) + j])
                     continue;
                 
                 StageCell stageCell = _stage[offset + _currentBlockX + j];
                 if (stageCell.IsBlocked)
                     return true;
             }
-        }*/
-        
-        // 현재 블록이 바닥에 닿았는지 확인
-        if (_currentBlockY + _currentBlock.height >= TetrisDefine.TetrisStageRows)
-            return true;
+        }
 
         return false;
     }
