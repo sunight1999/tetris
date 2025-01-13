@@ -3,6 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum Direction
+{
+    Left,
+    Down,
+    Right
+}
+
 [Serializable]
 public struct TetrisBlock
 {
@@ -21,8 +28,24 @@ public struct TetrisBlock
         width = -1;
     }
 
+    public TetrisBlock(TetrisBlock other)
+    {
+        name = other.name;
+        color = other.color;
+        blockShape = new bool[TetrisDefine.TetrisBlockRows * TetrisDefine.TetrisBlockCols];
+        other.blockShape.CopyTo(blockShape, 0);
+        height = other.height;
+        width = other.width;
+    }
+
+    /// <summary>
+    /// 블록의 가로 길이와 세로 길이를 계산
+    /// </summary>
     public void CaculateSize()
     {
+        height = -1;
+        width = -1;
+
         for (int i = 0; i < TetrisDefine.TetrisBlockRows; i++)
         {
             int offset = TetrisDefine.TetrisBlockCols * i;
@@ -41,6 +64,9 @@ public struct TetrisBlock
         ++width;
     }
 
+    /// <summary>
+    /// 블록을 시계 방향으로 90도 회전
+    /// </summary>
     public void Rotate()
     {
         bool[] newBlockShape = new bool[TetrisDefine.TetrisBlockRows * TetrisDefine.TetrisBlockCols];

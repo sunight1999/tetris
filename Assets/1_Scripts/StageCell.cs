@@ -15,6 +15,11 @@ public class StageCell : MonoBehaviour
         IsBlocked = false;
     }
     
+    public void SetBlockTemporarily(TetrisBlock block)
+    {
+        _cellImage.color = block.color;
+    }
+
     public void SetBlock(TetrisBlock block)
     {
         IsBlocked = true;
