@@ -9155,32 +9155,39 @@ MonoBehaviour:
   tetrisBlocks:
   - name: '|'
     color: {r: 0.8867924, g: 0.0050195074, b: 0.0050195074, a: 1}
-    blockShape: 010000010000010000010000
+    blockShape: 01000000010000000100000001000000
     height: 0
+    width: 0
   - name: -L
     color: {r: 0.9169811, g: 0.85462576, b: 0, a: 1}
-    blockShape: 000100000100010100000000
+    blockShape: 00010000000100000101000000000000
     height: 0
+    width: 0
   - name: L
     color: {r: 0, g: 0.81886786, b: 0.10053891, a: 1}
-    blockShape: 010000010000010100000000
+    blockShape: 01000000010000000101000000000000
     height: 0
+    width: 0
   - name: "\u3141"
     color: {r: 0.9169811, g: 0.40892032, b: 0, a: 1}
-    blockShape: 010100010100000000000000
+    blockShape: 01010000010100000000000000000000
     height: 0
+    width: 0
   - name: -z
     color: {r: 0, g: 0.77951175, b: 0.8784314, a: 1}
-    blockShape: 000101010100000000000000
+    blockShape: 00010100010100000000000000000000
     height: 0
+    width: 0
   - name: z
     color: {r: 0.8490566, g: 0, b: 0.7427731, a: 1}
-    blockShape: 010100000101000000000000
+    blockShape: 01010000000101000000000000000000
     height: 0
+    width: 0
   - name: "\u315C"
     color: {r: 0.07524926, g: 0, b: 0.8867924, a: 1}
-    blockShape: 010101000100000000000000
+    blockShape: 01010100000100000000000000000000
     height: 0
+    width: 0
 --- !u!4 &806793839
 Transform:
   m_ObjectHideFlags: 0
