@@ -17,30 +17,54 @@ public class Stage : MonoBehaviour
     private TetrisBlock _currentBlock;
     private int _currentBlockX;
     private int _currentBlockY;
-    
     private int _currentHighestY;
     private List<int> _completedLines;
     
     private List<StageCell> _previousStepCells;
-    
+
+    private Player _player = null;
+
+    private Coroutine _stageCoroutine = null;
+        
     private void Awake()
     {
-        _isPlacing = false;
-        _currentHighestY = TetrisDefine.TetrisStageRows - 1;
         _completedLines = new List<int>();
         _previousStepCells = new List<StageCell>();
     }
 
-    private void Start()
+    private void Init()
     {
-        Begin();
+        _isPlacing = false;
+        _currentHighestY = TetrisDefine.TetrisStageRows - 1;
+        _completedLines.Clear();
+        _previousStepCells.Clear();
+        
+        foreach (StageCell stageCell in _stage)
+            stageCell.Reset();
+        
+        if (_stageCoroutine != null)
+            StopCoroutine(_stageCoroutine);
     }
 
-    public void Begin()
+    public void SetPlayer(Player player)
     {
-        StartCoroutine(StageUpdateCoroutine());
-
+        _player = player;
+    }
+    
+    public void Play()
+    {
+        Init();
+        _stageCoroutine = StartCoroutine(StageUpdateCoroutine());
+        
+        AddObstacleLines(3);
+        
         CreateBlock();
+    }
+
+    public void Stop()
+    {
+        StopCoroutine(_stageCoroutine);
+        _stageCoroutine = null;
     }
 
     IEnumerator StageUpdateCoroutine()
@@ -49,8 +73,8 @@ public class Stage : MonoBehaviour
         {
             yield return new WaitForSeconds(_blockDownTime);
 
-            if (!_isPlacing)
-                continue;
+            while (!_isPlacing)
+                yield return new WaitForSeconds(0.1f);
             
             if (!TryMoveBlock(Direction.Down))
             {
@@ -60,13 +84,21 @@ public class Stage : MonoBehaviour
 
                 // 추후 라인을 제거할 때 확인 범위를 좁히기 위해 가장 높은 블록의 y 값 저장
                 if (_currentHighestY > _currentBlockY)
+                {
                     _currentHighestY = _currentBlockY;
+
+                    // 블록이 천장에 닿아 게임 오버 
+                    if (_currentHighestY == 0)
+                    {
+                        GameManager.Instance.SetLose(_player);
+                        break;
+                    }
+                }
                 
                 _previousStepCells.Clear();
 
                 // 블록이 바닥이나 다른 블록에 닿았을 경우 라인 완성 검사
-                CheckLines();
-                continue;
+                CheckCompleteAndNewLines();
             }
         }
     }
@@ -170,15 +202,15 @@ public class Stage : MonoBehaviour
         return false;
     }
     
-    private void CheckLines()
+    private void CheckCompleteAndNewLines()
     {
         _isPlacing = false;
-        StartCoroutine(CheckLinesCoroutine());
+        StartCoroutine(CheckCompleteAndNewLinesCoroutine());
     }
 
-    IEnumerator CheckLinesCoroutine()
+    IEnumerator CheckCompleteAndNewLinesCoroutine()
     {
-        // 완성된 라인 확인
+        // 완성된 라인 존재 여부 확인
         for (int i = TetrisDefine.TetrisStageRows - 1; i >= _currentHighestY; i--)
         {
             bool isCompleted = true;
@@ -197,6 +229,7 @@ public class Stage : MonoBehaviour
                 _completedLines.Add(i);
         }
 
+        // 완성된 라인이 있다면 제거 후 스테이지 정리
         if (_completedLines.Count > 0)
         {
             CompleteLines();
@@ -204,7 +237,15 @@ public class Stage : MonoBehaviour
             AdjustLines();
             yield return new WaitForSeconds(_lineCompleteTime);
         }
+
+        // 블록을 쌓는 동안 받은 공격이 있다면 모두 처리
+        int obstacleLineNum = 0;
+        while (_player.HitQueue.Count > 0)
+            obstacleLineNum += _player.HitQueue.Dequeue();
         
+        AddObstacleLines(obstacleLineNum);
+        
+        // 다음 블록 생성
         CreateBlock();
     }
 
@@ -219,6 +260,10 @@ public class Stage : MonoBehaviour
                 stageCell.Reset();
             }
         }
+        
+        // 완성한 줄이 2줄 이상일 경우 완성한 줄 - 1개의 장애물 블록을 상대방에게 공격
+        if (_completedLines.Count > 1)
+            GameManager.Instance.AttackTo(_player, _completedLines.Count - 1);
     }
     
     private void AdjustLines()
@@ -274,7 +319,42 @@ public class Stage : MonoBehaviour
             toStageCell.SetBlock(color);
         }
     }
+    
+    public void AddObstacleLines(int num)
+    {
+        if (num == 0)
+            return;
+        
+        // 생성할 장애물 블록 높이만큼 기존 블록들을 모두 위로 이동
+        for (int i = 0; i < TetrisDefine.TetrisStageRows; i++)
+        {
+            int from = i;
+            int to = from - num;
 
+            if (to < 0)
+                continue;
+            
+            SwapLine(from, to);
+        }
+
+        // 장애물 블록 생성
+        int holeIndex = Random.Range(0, TetrisDefine.TetrisStageCols - 1);
+        for (int i = TetrisDefine.TetrisStageRows - num; i < TetrisDefine.TetrisStageRows; i++)
+        {
+            int offset = TetrisDefine.TetrisStageCols * i;
+            for (int j = 0; j < TetrisDefine.TetrisStageCols; j++)
+            {
+                if (j == holeIndex)
+                    continue;
+
+                StageCell stageCell = _stage[offset + j];
+                stageCell.SetBlock(TetrisDefine.ObstacleCellColor);
+            }
+        }
+
+        _currentHighestY -= num;
+    }
+    
     public void RotateBlock()
     {
         TetrisBlock rotatedBlock = new TetrisBlock(_currentBlock);
@@ -305,6 +385,6 @@ public class Stage : MonoBehaviour
     
     public void DropBlock()
     {
-
+    
     }
 }
