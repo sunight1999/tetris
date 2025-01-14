@@ -13,6 +13,7 @@ public enum Direction
 [Serializable]
 public struct TetrisBlock
 {
+    public int id;
     public string name;
     public Color color;
     public bool[] blockShape;
@@ -21,6 +22,7 @@ public struct TetrisBlock
     
     public TetrisBlock(int row = TetrisDefine.TetrisBlockRows, int col = TetrisDefine.TetrisBlockCols)
     {
+        id = -1;
         name = "block";
         color = Color.gray;
         blockShape = new bool[row * col];
@@ -30,6 +32,7 @@ public struct TetrisBlock
 
     public TetrisBlock(TetrisBlock other)
     {
+        id = other.id;
         name = other.name;
         color = other.color;
         blockShape = new bool[TetrisDefine.TetrisBlockRows * TetrisDefine.TetrisBlockCols];
@@ -99,6 +102,7 @@ public class TetrisDefine : SingletonBehaviour<TetrisDefine>
     public static readonly Color ObstacleCellColor = new Color(0.2f, 0.2f, 0.2f, 1f);
     
     public TetrisBlock[] tetrisBlocks;
+    public Sprite[] tetrisBlockImages;
 
     protected override void Awake()
     {
@@ -112,6 +116,8 @@ public class TetrisDefine : SingletonBehaviour<TetrisDefine>
                 Debug.LogWarning($"{block.name} 블록의 크기가 잘못되었습니다. {TetrisDefine.TetrisBlockRows}x{TetrisDefine.TetrisBlockCols} 크기인지 확인해주세요.");
 
             block.CaculateSize();
+            block.id = i;
+            
             tetrisBlocks[i] = block;
         }
     }

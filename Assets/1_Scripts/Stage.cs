@@ -8,10 +8,13 @@ using Random = UnityEngine.Random;
 public class Stage : MonoBehaviour
 {
     [SerializeField] private StageCell[] _stage;
+    [SerializeField] private BlockInfo _nextBlockInfo;
     
     [SerializeField] private int _createPositionX = 4;
     [SerializeField] private float _blockDownTime = 1f;
     [SerializeField] private float _lineCompleteTime = .5f;
+
+    private int _nextBlockIndex;
 
     private bool _isPlacing;
     private TetrisBlock _currentBlock;
@@ -28,6 +31,7 @@ public class Stage : MonoBehaviour
         
     private void Awake()
     {
+        _nextBlockIndex = -1;
         _completedLines = new List<int>();
         _previousStepCells = new List<StageCell>();
     }
@@ -55,10 +59,6 @@ public class Stage : MonoBehaviour
     {
         Init();
         _stageCoroutine = StartCoroutine(StageUpdateCoroutine());
-        
-        AddObstacleLines(3);
-        
-        CreateBlock();
     }
 
     public void Stop()
@@ -69,10 +69,15 @@ public class Stage : MonoBehaviour
 
     IEnumerator StageUpdateCoroutine()
     {
+        // 시작 맵 및 블록 구성
+        AddObstacleLines(3);
+        CreateBlock();
+        
         while (GameManager.Instance.GameState == GameState.Playing)
         {
             yield return new WaitForSeconds(_blockDownTime);
 
+            // 완성된 라인을 확인하는 도중엔 다른 작업 중지
             while (!_isPlacing)
                 yield return new WaitForSeconds(0.1f);
             
@@ -103,10 +108,17 @@ public class Stage : MonoBehaviour
         }
     }
 
+    #region 블록 생성 및 이동, 관리
     private void CreateBlock()
     {
-        int blockIndex = Random.Range(0, TetrisDefine.Instance.tetrisBlocks.Length);
+        // 다음 블록이 지정되어 있으면 해당 블록 사용
+        int blockIndex = _nextBlockIndex; 
+        if (blockIndex == - 1)
+            blockIndex = Random.Range(0, TetrisDefine.Instance.tetrisBlocks.Length);
+        
         _currentBlock = TetrisDefine.Instance.tetrisBlocks[blockIndex];
+        _nextBlockIndex = Random.Range(0, TetrisDefine.Instance.tetrisBlocks.Length);
+        _nextBlockInfo.SetBlock(TetrisDefine.Instance.tetrisBlocks[_nextBlockIndex]);
 
         _currentBlockX = _createPositionX;
         _currentBlockY = 0;
@@ -201,6 +213,51 @@ public class Stage : MonoBehaviour
 
         return false;
     }
+    
+    public void RotateBlock()
+    {
+        TetrisBlock rotatedBlock = new TetrisBlock(_currentBlock);
+        rotatedBlock.Rotate();
+
+        int rotatedBlockX = _currentBlockX;
+        int rotatedBlockY = _currentBlockY;
+
+        // 벽 가까이에서 회전할 경우 위치 보정
+        if (rotatedBlockX + rotatedBlock.width >= TetrisDefine.TetrisStageCols)
+            rotatedBlockX = TetrisDefine.TetrisStageCols - rotatedBlock.width;
+
+        if (rotatedBlockY + rotatedBlock.height >= TetrisDefine.TetrisStageRows)
+            rotatedBlockY = TetrisDefine.TetrisStageRows - rotatedBlock.height;
+
+        // 회전 위치에 대해 충돌 검사 진행
+        if (CheckCollision(rotatedBlock, rotatedBlockX, rotatedBlockY))
+            return;
+        
+        // 현재 블록 정보를 회전한 블록으로 업데이트
+        _currentBlock = rotatedBlock;
+        _currentBlockX = rotatedBlockX;
+        _currentBlockY = rotatedBlockY;
+
+        ClearPreviousStep();
+        DrawStep();
+    }
+    
+    public void DropBlock()
+    {
+        // 제일 밑에서부터 블록을 배치할 수 있는 위치 탐색
+        for (int i = TetrisDefine.TetrisStageRows - _currentBlock.height; i > _currentBlockY + _currentBlock.height; i--)
+        {
+            if (!CheckCollision(_currentBlock, _currentBlockX, i))
+            {
+                _currentBlockY = i;
+                ClearPreviousStep();
+                DrawStep();
+            }
+        }
+    }
+    #endregion
+    
+    #region 라인 검사 및 관리
     
     private void CheckCompleteAndNewLines()
     {
@@ -355,45 +412,5 @@ public class Stage : MonoBehaviour
         _currentHighestY -= num;
     }
     
-    public void RotateBlock()
-    {
-        TetrisBlock rotatedBlock = new TetrisBlock(_currentBlock);
-        rotatedBlock.Rotate();
-
-        int rotatedBlockX = _currentBlockX;
-        int rotatedBlockY = _currentBlockY;
-
-        // 벽 가까이에서 회전할 경우 위치 보정
-        if (rotatedBlockX + rotatedBlock.width >= TetrisDefine.TetrisStageCols)
-            rotatedBlockX = TetrisDefine.TetrisStageCols - rotatedBlock.width;
-
-        if (rotatedBlockY + rotatedBlock.height >= TetrisDefine.TetrisStageRows)
-            rotatedBlockY = TetrisDefine.TetrisStageRows - rotatedBlock.height;
-
-        // 회전 위치에 대해 충돌 검사 진행
-        if (CheckCollision(rotatedBlock, rotatedBlockX, rotatedBlockY))
-            return;
-        
-        // 현재 블록 정보를 회전한 블록으로 업데이트
-        _currentBlock = rotatedBlock;
-        _currentBlockX = rotatedBlockX;
-        _currentBlockY = rotatedBlockY;
-
-        ClearPreviousStep();
-        DrawStep();
-    }
-    
-    public void DropBlock()
-    {
-        // 제일 밑에서부터 블록을 배치할 수 있는 위치 탐색
-        for (int i = TetrisDefine.TetrisStageRows - _currentBlock.height; i > _currentBlockY + _currentBlock.height; i--)
-        {
-            if (!CheckCollision(_currentBlock, _currentBlockX, i))
-            {
-                _currentBlockY = i;
-                ClearPreviousStep();
-                DrawStep();
-            }
-        }
-    }
+    #endregion
 }

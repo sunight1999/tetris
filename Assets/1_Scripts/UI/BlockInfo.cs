@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UIElements;
+using UnityEngine.UI;
 
 public class BlockInfo : MonoBehaviour
 {
@@ -11,7 +11,7 @@ public class BlockInfo : MonoBehaviour
 
     public void SetBlock(TetrisBlock block)
     {
-        
+        _blockImage.sprite = TetrisDefine.Instance.tetrisBlockImages[block.id];
     }
     
     public void SetInfoText(string text)
