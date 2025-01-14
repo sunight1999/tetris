@@ -385,6 +385,15 @@ public class Stage : MonoBehaviour
     
     public void DropBlock()
     {
-    
+        // 제일 밑에서부터 블록을 배치할 수 있는 위치 탐색
+        for (int i = TetrisDefine.TetrisStageRows - _currentBlock.height; i > _currentBlockY + _currentBlock.height; i--)
+        {
+            if (!CheckCollision(_currentBlock, _currentBlockX, i))
+            {
+                _currentBlockY = i;
+                ClearPreviousStep();
+                DrawStep();
+            }
+        }
     }
 }
