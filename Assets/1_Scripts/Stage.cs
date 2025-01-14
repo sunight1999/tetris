@@ -11,17 +11,23 @@ public class Stage : MonoBehaviour
     
     [SerializeField] private int _createPositionX = 4;
     [SerializeField] private float _blockDownTime = 1f;
+    [SerializeField] private float _lineCompleteTime = .5f;
 
     private bool _isPlacing;
     private TetrisBlock _currentBlock;
     private int _currentBlockX;
     private int _currentBlockY;
-
+    
+    private int _currentHighestY;
+    private List<int> _completedLines;
+    
     private List<StageCell> _previousStepCells;
     
     private void Awake()
     {
         _isPlacing = false;
+        _currentHighestY = TetrisDefine.TetrisStageRows - 1;
+        _completedLines = new List<int>();
         _previousStepCells = new List<StageCell>();
     }
 
@@ -46,11 +52,15 @@ public class Stage : MonoBehaviour
             if (!_isPlacing)
                 continue;
             
-            if (!MoveBlock(Direction.Down))
+            if (!TryMoveBlock(Direction.Down))
             {
                 // 블록을 해당 위치에 확정
                 foreach (StageCell stageCell in _previousStepCells)
                     stageCell.SetBlock(_currentBlock);
+
+                // 추후 라인을 제거할 때 확인 범위를 좁히기 위해 가장 높은 블록의 y 값 저장
+                if (_currentHighestY > _currentBlockY)
+                    _currentHighestY = _currentBlockY;
                 
                 _previousStepCells.Clear();
 
@@ -73,7 +83,7 @@ public class Stage : MonoBehaviour
         DrawStep();
     }
 
-    public bool MoveBlock(Direction direction)
+    public bool TryMoveBlock(Direction direction)
     {
         if (!_isPlacing)
             return true;
@@ -146,7 +156,7 @@ public class Stage : MonoBehaviour
         for (int i = 0; i < block.height; i++)
         {
             int offset = TetrisDefine.TetrisStageCols * (blockPositionY + i);
-            for (int j = 0; j < TetrisDefine.TetrisBlockCols; j++)
+            for (int j = 0; j < block.width; j++)
             {
                 if (!block.blockShape[(i * TetrisDefine.TetrisBlockCols) + j])
                     continue;
@@ -163,10 +173,106 @@ public class Stage : MonoBehaviour
     private void CheckLines()
     {
         _isPlacing = false;
-        
-        // 완성이 된 라인이 있는지 스테이지 검사
+        StartCoroutine(CheckLinesCoroutine());
+    }
+
+    IEnumerator CheckLinesCoroutine()
+    {
+        // 완성된 라인 확인
+        for (int i = TetrisDefine.TetrisStageRows - 1; i >= _currentHighestY; i--)
+        {
+            bool isCompleted = true;
+            int offset = TetrisDefine.TetrisStageCols * i;
+            for (int j = 0; j < TetrisDefine.TetrisStageCols; j++)
+            {
+                StageCell stageCell = _stage[offset + j];
+                if (!stageCell.IsBlocked)
+                {
+                    isCompleted = false;
+                    break;
+                }
+            }
+
+            if (isCompleted)
+                _completedLines.Add(i);
+        }
+
+        if (_completedLines.Count > 0)
+        {
+            CompleteLines();
+            yield return new WaitForSeconds(_lineCompleteTime);
+            AdjustLines();
+            yield return new WaitForSeconds(_lineCompleteTime);
+        }
         
         CreateBlock();
+    }
+
+    private void CompleteLines()
+    {
+        foreach (int line in _completedLines)
+        {
+            int offset = TetrisDefine.TetrisStageCols * line;
+            for (int i = 0; i < TetrisDefine.TetrisStageCols; i++)
+            {
+                StageCell stageCell = _stage[offset + i];
+                stageCell.Reset();
+            }
+        }
+    }
+    
+    private void AdjustLines()
+    {
+        if (_completedLines.Count == 0)
+            return;
+
+        int adjustRangeBottom = _completedLines[0];
+        int adjustRangeTop = _currentHighestY;
+        
+        // 블록이 있는 라인 중 가장 윗 라인이 완성되면 해당 라인 위로는 블록이 없으므로 블록 검사 범위 축소
+        for (int i = _completedLines.Count - 1; i >= 0; i--)
+        {
+            if (_completedLines[i] == adjustRangeTop)
+            {
+                _completedLines.Remove(i);
+                --adjustRangeTop;
+            }
+        }
+
+        int headLine = adjustRangeBottom;
+        int tailLine = adjustRangeBottom - 1;
+        while (tailLine >= adjustRangeTop)
+        {
+            if (_completedLines.Contains(tailLine))
+            {
+                --tailLine;
+                continue;
+            }
+
+            SwapLine(tailLine, headLine);
+
+            --tailLine;
+            --headLine;
+        }
+        
+        _currentHighestY += _completedLines.Count;
+        _completedLines.Clear();
+    }
+
+    private void SwapLine(int fromLine, int toLine)
+    {
+        for (int i = 0; i < TetrisDefine.TetrisStageCols; i++)
+        {
+            StageCell fromStageCell = _stage[TetrisDefine.TetrisStageCols * fromLine + i];
+            StageCell toStageCell = _stage[TetrisDefine.TetrisStageCols * toLine + i];
+
+            if (!fromStageCell.IsBlocked)
+                continue;
+            
+            Color color = fromStageCell.GetBlockColor();
+            fromStageCell.Reset();
+            toStageCell.SetBlock(color);
+        }
     }
 
     public void RotateBlock()
@@ -196,7 +302,7 @@ public class Stage : MonoBehaviour
         ClearPreviousStep();
         DrawStep();
     }
-
+    
     public void DropBlock()
     {
 

@@ -25,4 +25,15 @@ public class StageCell : MonoBehaviour
         IsBlocked = true;
         _cellImage.color = block.color;
     }
+
+    public void SetBlock(Color color)
+    {
+        IsBlocked = true;
+        _cellImage.color = color;
+    }
+
+    public Color GetBlockColor()
+    {
+        return _cellImage.color;
+    }
 }
