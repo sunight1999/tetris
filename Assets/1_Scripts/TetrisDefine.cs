@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -9,6 +6,18 @@ public enum Direction
     Left,
     Down,
     Right
+}
+
+public enum GameState
+{
+    Idle,
+    Playing
+}
+
+public enum MenuType
+{
+    Option,
+    Countdown
 }
 
 public class TetrisDefine : SingletonBehaviour<TetrisDefine>
@@ -35,7 +44,9 @@ public class TetrisDefine : SingletonBehaviour<TetrisDefine>
         base.Awake();
 
         foreach (TetrisBlock tetrisBlock in tetrisBlocks)
+        {
             tetrisBlock.CaculateAllRotations();
+        }
     }
 
     public TetrisBlock GetRandomTetrisBlock()

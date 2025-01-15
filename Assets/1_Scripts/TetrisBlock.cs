@@ -1,18 +1,15 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 [Serializable]
 public class TetrisBlock
 {
-    public int id;
-    public string name = "block";
+    public int id = -1;
+    public string name = string.Empty;
     public Color color = Color.gray;
-    public Sprite blockImage;
-    public List<BlockShape> blockShapes;
+    public Sprite blockImage = null;
+    public List<BlockShape> blockShapes = null;
     
     public void CaculateAllRotations()
     {
@@ -35,15 +32,13 @@ public class TetrisBlock
     [Serializable]
     public class BlockShape
     {
-        public bool[] shape;
-        [HideInInspector] public int height;
-        [HideInInspector] public int width;
+        public bool[] shape = null;
+        [HideInInspector] public int height = -1;
+        [HideInInspector] public int width = -1;
     
-        public BlockShape(int maxBlockRows, int maxBlockCols)
+        public BlockShape()
         {
-            shape = new bool[maxBlockRows * maxBlockCols];
-            height = -1;
-            width = -1;
+            shape = new bool[TetrisDefine.TetrisBlockRows * TetrisDefine.TetrisBlockCols];
         }
         
         /// <summary>
@@ -60,7 +55,9 @@ public class TetrisBlock
                 for (int j = 0; j < TetrisDefine.TetrisBlockCols; j++)
                 {
                     if (!shape[offset + j])
+                    {
                         continue;
+                    }
     
                     height = i;
                     width = width < j ? j : width;
@@ -71,39 +68,13 @@ public class TetrisBlock
             ++height;
             ++width;
         }
-        
-        public static void CaculateSize(ref BlockShape blockShape)
-        {
-            int calculatedHeight = -1;
-            int calculatedWidth = -1;
-    
-            for (int i = 0; i < TetrisDefine.TetrisBlockRows; i++)
-            {
-                int offset = TetrisDefine.TetrisBlockCols * i;
-                for (int j = 0; j < TetrisDefine.TetrisBlockCols; j++)
-                {
-                    if (!blockShape.shape[offset + j])
-                        continue;
-    
-                    calculatedHeight = i;
-                    calculatedWidth = calculatedWidth < j ? j : calculatedWidth;
-                }
-            }
-    
-            // 0부터 시작하는 인덱스가 아니라 실제 길이를 원하므로 1씩 추가
-            ++calculatedHeight;
-            ++calculatedWidth;
-
-            blockShape.height = calculatedHeight;
-            blockShape.width = calculatedWidth;
-        }
     
         /// <summary>
         /// 블록을 시계 방향으로 90도 회전
         /// </summary>
         public BlockShape Rotate()
         {
-            BlockShape newBlockShape = new BlockShape(TetrisDefine.TetrisBlockRows, TetrisDefine.TetrisBlockCols);
+            BlockShape newBlockShape = new BlockShape();
             
             for (int i = 0; i < height; i++)
             {

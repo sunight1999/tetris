@@ -1,68 +1,78 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    [SerializeField] private StateInfo _stateInfo;
+    [SerializeField]
+    private StateInfo stateInfo = null;
     
-    [SerializeField] private KeyCode _leftKey;
-    [SerializeField] private KeyCode _downKey;
-    [SerializeField] private KeyCode _rightKey;
-    [SerializeField] private KeyCode _rotateKey;
-    [SerializeField] private KeyCode _dropKey;
-    [SerializeField] private KeyCode _holdKey;
-    [SerializeField] private KeyCode _readyKey;
-    [SerializeField] private Stage _stage;
+    [SerializeField]
+    private KeyCode leftKey = KeyCode.None;
     
-    public bool IsReady { get; private set; }
-    public Queue<int> HitQueue;
+    [SerializeField]
+    private KeyCode downKey = KeyCode.None;
     
-    private void Awake()
-    {
-        IsReady = false;
-        HitQueue = new Queue<int>();
-    }
+    [SerializeField]
+    private KeyCode rightKey = KeyCode.None;
+    
+    [SerializeField]
+    private KeyCode rotateKey = KeyCode.None;
+    
+    [SerializeField]
+    private KeyCode dropKey = KeyCode.None;
+    
+    [SerializeField]
+    private KeyCode holdKey = KeyCode.None;
+    
+    [SerializeField]
+    private KeyCode readyKey = KeyCode.None;
+    
+    [SerializeField]
+    private Stage stage = null;
+
+    public bool IsReady { get; private set; } = false;
+    public Queue<int> HitQueue = new Queue<int>();
 
     private void Start()
     {
-        _stateInfo.Init(_readyKey.ToString());
-        _stage.SetPlayer(this);
+        stateInfo.Init(readyKey.ToString());
+        stage.SetPlayer(this);
     }
 
-    void Update()
+    private void Update()
     {
         if (UIManager.Instance.IsMenuOpened)
             return;
         
         if (GameManager.Instance.GameState != GameState.Playing)
         {
-            if (Input.GetKeyDown(_readyKey))
+            if (Input.GetKeyDown(readyKey))
+            {
                 Ready();
+            }
             
             return;
         }
 
-        if (Input.GetKeyDown(_leftKey))
-            _stage.TryMoveBlock(Direction.Left);
-        if (Input.GetKeyDown(_downKey))
-            _stage.TryMoveBlock(Direction.Down);
-        if (Input.GetKeyDown(_rightKey))
-            _stage.TryMoveBlock(Direction.Right);
-        if (Input.GetKeyDown(_rotateKey))
-            _stage.RotateBlock();
-        if (Input.GetKeyDown(_holdKey))
-            _stage.HoldBlock();
-        if (Input.GetKeyDown(_dropKey))
-            _stage.DropBlock();
+        if (Input.GetKeyDown(leftKey))
+            stage.TryMoveBlock(Direction.Left);
+        if (Input.GetKeyDown(downKey))
+            stage.TryMoveBlock(Direction.Down);
+        if (Input.GetKeyDown(rightKey))
+            stage.TryMoveBlock(Direction.Right);
+        
+        if (Input.GetKeyDown(rotateKey))
+            stage.RotateBlock();
+        if (Input.GetKeyDown(holdKey))
+            stage.HoldBlock();
+        if (Input.GetKeyDown(dropKey))
+            stage.DropBlock();
     }
 
     public void Ready()
     {
         IsReady = true;
-        _stateInfo.Ready();
+        stateInfo.Ready();
     }
 
     public void Play()
@@ -70,8 +80,8 @@ public class Player : MonoBehaviour
         // 다음 게임을 위해 준비 상태를 false로 전환
         IsReady = false;
         
-        _stage.Play();
-        _stateInfo.Disable();
+        stage.Play();
+        stateInfo.Disable();
     }
 
     public void Hit(int obstacleNum)
@@ -81,13 +91,13 @@ public class Player : MonoBehaviour
 
     public void Win()
     {
-        _stateInfo.SetWin();
-        _stage.Stop();
+        stateInfo.SetWin();
+        stage.Stop();
     }
 
     public void Lose()
     {
-        _stateInfo.SetLose();
-        _stage.Stop();
+        stateInfo.SetLose();
+        stage.Stop();
     }
 }

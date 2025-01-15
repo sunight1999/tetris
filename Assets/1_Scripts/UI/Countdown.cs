@@ -1,13 +1,14 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 public class Countdown : UI
 {
-    [SerializeField] private float _countdown = 3f;
-    [SerializeField] private TextMeshProUGUI _countdownText;
+    [SerializeField]
+    private float countdown = 3f;
+    
+    [SerializeField]
+    private TextMeshProUGUI countdownText = null;
     
     private void OnEnable()
     {
@@ -16,18 +17,18 @@ public class Countdown : UI
 
     private void Count()
     {
-        _countdownText.text = $"{_countdown}";
-        StartCoroutine(CountCoroutine());
+        countdownText.text = $"{countdown}";
+        StartCoroutine(CoroutineCount());
     }
 
-    IEnumerator CountCoroutine()
+    private IEnumerator CoroutineCount()
     {
-        float countdown = _countdown;
-        while (countdown > 0)
+        float newCountdown = countdown;
+        while (newCountdown > 0)
         {
             yield return new WaitForSecondsRealtime(1f);
-            countdown -= 1f;
-            _countdownText.text = $"{(int)countdown}";
+            newCountdown -= 1f;
+            countdownText.text = $"{(int)newCountdown}";
         }
         
         UIManager.Instance.SetVisibility(MenuType.Countdown, false);

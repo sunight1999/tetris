@@ -1,24 +1,23 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 public class StateInfo : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI _readyText;
+    [SerializeField]
+    private TextMeshProUGUI readyText = null;
 
-    private string _readyKey;
+    private string readyKey = string.Empty;
     
-    public void Init(string readyKey)
+    public void Init(string inReadyKey)
     {
         gameObject.SetActive(true);
-        _readyText.text = $"Press {readyKey} key to ready";
-        _readyKey = readyKey;
+        readyText.text = $"Press {inReadyKey} key to ready";
+        readyKey = inReadyKey;
     }
 
     public void Ready()
     {
-        _readyText.text = "Ready";
+        readyText.text = "Ready";
     }
 
     public void Disable()
@@ -29,12 +28,12 @@ public class StateInfo : MonoBehaviour
     public void SetWin()
     {
         gameObject.SetActive(true);
-        _readyText.text = $"You Win\nPress {_readyKey} key to ready";
+        readyText.text = $"You Win\nPress {readyKey} key to ready";
     }
 
     public void SetLose()
     {
         gameObject.SetActive(true);
-        _readyText.text = $"You lose\nPress {_readyKey} key to ready";
+        readyText.text = $"You lose\nPress {readyKey} key to ready";
     }
 }

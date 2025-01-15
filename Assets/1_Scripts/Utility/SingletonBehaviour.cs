@@ -1,35 +1,33 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 
 public class SingletonBehaviour<T> : MonoBehaviour where T : MonoBehaviour
 {
+    private static T instance = null;
+    
     public static T Instance
     {
         get
         {
-            if (_instance == null)
+            if (instance == null)
             {
                 Debug.LogWarning($"{typeof(T).Name}를 찾을 수 없습니다. 임의로 객체를 생성합니다.");
                 
                 GameObject obj = new GameObject(nameof(T), typeof(T));
-                _instance = obj.GetComponent<T>();
-                DontDestroyOnLoad(_instance);
+                instance = obj.GetComponent<T>();
+                DontDestroyOnLoad(instance);
             }
             
-            return _instance;
+            return instance;
         }
     }
-    private static T _instance;
 
     protected virtual void Awake()
     {
-        if (_instance == null)
+        if (instance == null)
         {
-            _instance = this as T;
-            DontDestroyOnLoad(_instance);
+            instance = this as T;
+            DontDestroyOnLoad(instance);
         }
         else
         {
