@@ -243,6 +243,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e552f58331bd6254db74b68bc867dd80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  players:
+  - {fileID: 335516211}
+  - {fileID: 1590528955}
 --- !u!4 &175049204
 Transform:
   m_ObjectHideFlags: 0
@@ -952,6 +955,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 488955960462455913, guid: 669c36aa13e486047bf5223e511d1e22, type: 3}
   m_PrefabInstance: {fileID: 335516209}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &335516211 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4767071128958755151, guid: 669c36aa13e486047bf5223e511d1e22, type: 3}
+  m_PrefabInstance: {fileID: 335516209}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebbc2d12b1b02b846ac7561d6384454c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &444303250
 GameObject:
   m_ObjectHideFlags: 0
@@ -1796,54 +1810,60 @@ MonoBehaviour:
   tetrisBlocks:
   - id: 0
     name: '|'
-    color: {r: 0.8867924, g: 0.0050195074, b: 0.0050195074, a: 1}
-    blockShape: 01000000010000000100000001000000
-    height: 0
-    width: 0
-  - id: 0
+    color: {r: 0.8037735, g: 0, b: 0, a: 1}
+    blockImage: {fileID: 21300000, guid: 0f832bf704ecde846a5f6882a8545cd0, type: 3}
+    blockShapes:
+    - shape: 01000000010000000100000001000000
+      height: 0
+      width: 0
+  - id: 1
     name: -L
-    color: {r: 0.9169811, g: 0.85462576, b: 0, a: 1}
-    blockShape: 00010000000100000101000000000000
-    height: 0
-    width: 0
-  - id: 0
+    color: {r: 0.86415094, g: 0.84745234, b: 0, a: 1}
+    blockImage: {fileID: 21300000, guid: 12b762050021e2740ad614f22914c864, type: 3}
+    blockShapes:
+    - shape: 00010000000100000101000000000000
+      height: 0
+      width: 0
+  - id: 2
     name: L
-    color: {r: 0, g: 0.81886786, b: 0.10053891, a: 1}
-    blockShape: 01000000010000000101000000000000
-    height: 0
-    width: 0
-  - id: 0
+    color: {r: 0, g: 0.8627451, b: 0.18076943, a: 1}
+    blockImage: {fileID: 21300000, guid: 891e96b9d024c1f4b8f6e500f34a83ed, type: 3}
+    blockShapes:
+    - shape: 01000000010000000101000000000000
+      height: 0
+      width: 0
+  - id: 3
     name: "\u3141"
-    color: {r: 0.9169811, g: 0.40892032, b: 0, a: 1}
-    blockShape: 01010000010100000000000000000000
-    height: 0
-    width: 0
-  - id: 0
+    color: {r: 0.8627451, g: 0.4707024, b: 0, a: 1}
+    blockImage: {fileID: 21300000, guid: 1c2f9678c91230d4eaff94a3e0eda59b, type: 3}
+    blockShapes:
+    - shape: 01010000010100000000000000000000
+      height: 0
+      width: 0
+  - id: 4
     name: -z
-    color: {r: 0, g: 0.77951175, b: 0.8784314, a: 1}
-    blockShape: 00010100010100000000000000000000
-    height: 0
-    width: 0
-  - id: 0
+    color: {r: 0, g: 0.8627451, b: 0.7873585, a: 1}
+    blockImage: {fileID: 21300000, guid: 7ee19f5727e2b75409b7590d7307ff6a, type: 3}
+    blockShapes:
+    - shape: 00010100010100000000000000000000
+      height: 0
+      width: 0
+  - id: 5
     name: z
-    color: {r: 0.8490566, g: 0, b: 0.7427731, a: 1}
-    blockShape: 01010000000101000000000000000000
-    height: 0
-    width: 0
-  - id: 0
-    name: "\u315C"
-    color: {r: 0.07524926, g: 0, b: 0.8867924, a: 1}
-    blockShape: 01010100000100000000000000000000
-    height: 0
-    width: 0
-  tetrisBlockImages:
-  - {fileID: 21300000, guid: 0f832bf704ecde846a5f6882a8545cd0, type: 3}
-  - {fileID: 21300000, guid: 12b762050021e2740ad614f22914c864, type: 3}
-  - {fileID: 21300000, guid: 891e96b9d024c1f4b8f6e500f34a83ed, type: 3}
-  - {fileID: 21300000, guid: 1c2f9678c91230d4eaff94a3e0eda59b, type: 3}
-  - {fileID: 21300000, guid: 7ee19f5727e2b75409b7590d7307ff6a, type: 3}
-  - {fileID: 21300000, guid: ca4d24387bbecd341a0e1fee3ea63208, type: 3}
-  - {fileID: 21300000, guid: db95cba67c6c83f4ab61ea0e9c26503a, type: 3}
+    color: {r: 0, g: 0.44413796, b: 0.8627451, a: 1}
+    blockImage: {fileID: 21300000, guid: ca4d24387bbecd341a0e1fee3ea63208, type: 3}
+    blockShapes:
+    - shape: 01010000000101000000000000000000
+      height: 0
+      width: 0
+  - id: 6
+    name: z
+    color: {r: 0, g: 0.44413796, b: 0.8627451, a: 1}
+    blockImage: {fileID: 21300000, guid: db95cba67c6c83f4ab61ea0e9c26503a, type: 3}
+    blockShapes:
+    - shape: 01010100000100000000000000000000
+      height: 0
+      width: 0
 --- !u!4 &806793839
 Transform:
   m_ObjectHideFlags: 0
@@ -7446,6 +7466,17 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 200
   m_TargetDisplay: 0
+--- !u!114 &1590528955 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4767071128958755151, guid: 669c36aa13e486047bf5223e511d1e22, type: 3}
+  m_PrefabInstance: {fileID: 586092793}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebbc2d12b1b02b846ac7561d6384454c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1612919307
 GameObject:
   m_ObjectHideFlags: 0
