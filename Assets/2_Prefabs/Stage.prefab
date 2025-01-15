@@ -8813,6 +8813,7 @@ MonoBehaviour:
   - {fileID: 6942197288038957233}
   - {fileID: 4966266855073526323}
   _nextBlockInfo: {fileID: 2832337152114193305}
+  _holdBlockInfo: {fileID: 5274681692344915658}
   _createPositionX: 4
   _blockDownTime: 0.25
   _lineCompleteTime: 0.5
@@ -19117,7 +19118,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 223170132144191645, guid: e8bcbeb84d3b61f418eabe6b15cc9a6b, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 223170132144191645, guid: e8bcbeb84d3b61f418eabe6b15cc9a6b, type: 3}
       propertyPath: m_AnchorMin.x
@@ -19125,7 +19126,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 223170132144191645, guid: e8bcbeb84d3b61f418eabe6b15cc9a6b, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 223170132144191645, guid: e8bcbeb84d3b61f418eabe6b15cc9a6b, type: 3}
       propertyPath: m_SizeDelta.x
@@ -19165,11 +19166,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 223170132144191645, guid: e8bcbeb84d3b61f418eabe6b15cc9a6b, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 65
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 223170132144191645, guid: e8bcbeb84d3b61f418eabe6b15cc9a6b, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -300
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 223170132144191645, guid: e8bcbeb84d3b61f418eabe6b15cc9a6b, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -19189,13 +19190,28 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7049531114781527072, guid: e8bcbeb84d3b61f418eabe6b15cc9a6b, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8649111424082411516, guid: e8bcbeb84d3b61f418eabe6b15cc9a6b, type: 3}
+      propertyPath: m_text
+      value: Hold
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e8bcbeb84d3b61f418eabe6b15cc9a6b, type: 3}
+--- !u!114 &5274681692344915658 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3345332900401992714, guid: e8bcbeb84d3b61f418eabe6b15cc9a6b, type: 3}
+  m_PrefabInstance: {fileID: 7448511234814165696}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9ba64e48b3975348a333f381346b825, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &7225657869473200733 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 223170132144191645, guid: e8bcbeb84d3b61f418eabe6b15cc9a6b, type: 3}

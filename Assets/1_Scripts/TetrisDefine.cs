@@ -98,6 +98,8 @@ public class TetrisDefine : SingletonBehaviour<TetrisDefine>
     public const int TetrisBlockRows = 4;
     public const int TetrisBlockCols = 4;
 
+    public const int InvalidIndex = -1;
+    
     public static readonly Color NormalCellColor = new Color(0f, 0f, 0f, 0.5f);
     public static readonly Color ObstacleCellColor = new Color(0.2f, 0.2f, 0.2f, 1f);
     

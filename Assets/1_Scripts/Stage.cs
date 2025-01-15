@@ -9,12 +9,14 @@ public class Stage : MonoBehaviour
 {
     [SerializeField] private StageCell[] _stage;
     [SerializeField] private BlockInfo _nextBlockInfo;
+    [SerializeField] private BlockInfo _holdBlockInfo;
     
     [SerializeField] private int _createPositionX = 4;
     [SerializeField] private float _blockDownTime = 1f;
     [SerializeField] private float _lineCompleteTime = .5f;
 
     private int _nextBlockIndex;
+    private int _holdBlockIndex;
 
     private bool _isPlacing;
     private TetrisBlock _currentBlock;
@@ -31,7 +33,8 @@ public class Stage : MonoBehaviour
         
     private void Awake()
     {
-        _nextBlockIndex = -1;
+        _nextBlockIndex = TetrisDefine.InvalidIndex;
+        _holdBlockIndex = TetrisDefine.InvalidIndex;
         _completedLines = new List<int>();
         _previousStepCells = new List<StageCell>();
     }
@@ -109,16 +112,20 @@ public class Stage : MonoBehaviour
     }
 
     #region 블록 생성 및 이동, 관리
-    private void CreateBlock()
+    private void CreateBlock(int blockIndex = TetrisDefine.InvalidIndex)
     {
-        // 다음 블록이 지정되어 있으면 해당 블록 사용
-        int blockIndex = _nextBlockIndex; 
-        if (blockIndex == - 1)
-            blockIndex = Random.Range(0, TetrisDefine.Instance.tetrisBlocks.Length);
+        // 파라미터로 지정된 블록이 없다면 다음 블록이나 랜덤 블록 사용
+        if (blockIndex == TetrisDefine.InvalidIndex)
+        {
+            if (_nextBlockIndex == TetrisDefine.InvalidIndex)
+                blockIndex = Random.Range(0, TetrisDefine.Instance.tetrisBlocks.Length);
+            else
+                blockIndex = _nextBlockIndex;
+        }
         
         _currentBlock = TetrisDefine.Instance.tetrisBlocks[blockIndex];
-        _nextBlockIndex = Random.Range(0, TetrisDefine.Instance.tetrisBlocks.Length);
-        _nextBlockInfo.SetBlock(TetrisDefine.Instance.tetrisBlocks[_nextBlockIndex]);
+        _nextBlockIndex = Random.Range(0, TetrisDefine.Instance.tetrisBlockImages.Length);
+        _nextBlockInfo.BlockImage.sprite = TetrisDefine.Instance.tetrisBlockImages[_nextBlockIndex]; 
 
         _currentBlockX = _createPositionX;
         _currentBlockY = 0;
@@ -240,6 +247,34 @@ public class Stage : MonoBehaviour
 
         ClearPreviousStep();
         DrawStep();
+    }
+
+    public void HoldBlock()
+    {
+        if (!_isPlacing)
+            return;
+
+        ClearPreviousStep();
+        
+        if (_holdBlockIndex == TetrisDefine.InvalidIndex)
+        {
+            _holdBlockIndex = _currentBlock.id;
+            CreateBlock();
+        }
+        else
+        {
+            int blockIndex = _currentBlock.id;
+            _currentBlock = TetrisDefine.Instance.tetrisBlocks[_holdBlockIndex];
+            _holdBlockIndex = blockIndex;
+
+            // 블록을 변경했을 때 충돌이 발생한다면 Y 위치 조정
+            while (CheckCollision(_currentBlock, _currentBlockX, _currentBlockY) && _currentBlockY > 0)
+                --_currentBlockY;
+            
+            DrawStep();
+        }
+        
+        _holdBlockInfo.BlockImage.sprite = TetrisDefine.Instance.tetrisBlockImages[_holdBlockIndex]; 
     }
     
     public void DropBlock()

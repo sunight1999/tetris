@@ -37,15 +37,18 @@ public class UIManager : SingletonBehaviour<UIManager>
             return;
         }
         
-        // 모든 UI는 창을 닫으면 카운터다운 UI 표출
-        if (menu != MenuType.Countdown && GameManager.Instance.GameState == GameState.Playing)
+        // 게임 도중 팝업 UI 창을 닫으면 카운터다운 UI 표출
+        bool isPopUp = menu != MenuType.Countdown && _managedUIs[(int)menu].isPopUp;
+        if (isPopUp && GameManager.Instance.GameState == GameState.Playing)
             SetVisibility(MenuType.Countdown, true);
         else
             Time.timeScale = 1f;
     }
 
+    #region 버튼 OnClick 이벤트 콜백
     public void SetOptionVisibility(bool isVisible)
     {
         SetVisibility(MenuType.Option, isVisible);
     }
+    #endregion
 }

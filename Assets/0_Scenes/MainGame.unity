@@ -847,6 +847,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67ea7a1ac655e6d4ab7ca5d1ee8839b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isPopUp: 1
   _optionPanel: {fileID: 655911406}
   _blurImage: {fileID: 1391384109}
 --- !u!1001 &335516209
@@ -908,6 +909,10 @@ PrefabInstance:
     - target: {fileID: 4767071128958755151, guid: 669c36aa13e486047bf5223e511d1e22, type: 3}
       propertyPath: _dropKey
       value: 32
+      objectReference: {fileID: 0}
+    - target: {fileID: 4767071128958755151, guid: 669c36aa13e486047bf5223e511d1e22, type: 3}
+      propertyPath: _holdKey
+      value: 101
       objectReference: {fileID: 0}
     - target: {fileID: 4767071128958755151, guid: 669c36aa13e486047bf5223e511d1e22, type: 3}
       propertyPath: _leftKey
@@ -1207,6 +1212,10 @@ PrefabInstance:
     - target: {fileID: 4767071128958755151, guid: 669c36aa13e486047bf5223e511d1e22, type: 3}
       propertyPath: _dropKey
       value: 256
+      objectReference: {fileID: 0}
+    - target: {fileID: 4767071128958755151, guid: 669c36aa13e486047bf5223e511d1e22, type: 3}
+      propertyPath: _holdKey
+      value: 266
       objectReference: {fileID: 0}
     - target: {fileID: 4767071128958755151, guid: 669c36aa13e486047bf5223e511d1e22, type: 3}
       propertyPath: _leftKey
@@ -7371,6 +7380,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 209d0f69e68927b489ac8e218407b276, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isPopUp: 0
   _countdown: 3
   _countdownText: {fileID: 1983168717}
 --- !u!114 &1504206681

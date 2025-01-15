@@ -241,8 +241,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9ba64e48b3975348a333f381346b825, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _blockImage: {fileID: 1221432827023026973}
-  _infoText: {fileID: 8649111424082411516}
+  <BlockImage>k__BackingField: {fileID: 1221432827023026973}
 --- !u!1 &8381161203521790781
 GameObject:
   m_ObjectHideFlags: 0
@@ -341,7 +340,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535

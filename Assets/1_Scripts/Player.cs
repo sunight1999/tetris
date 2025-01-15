@@ -13,6 +13,7 @@ public class Player : MonoBehaviour
     [SerializeField] private KeyCode _rightKey;
     [SerializeField] private KeyCode _rotateKey;
     [SerializeField] private KeyCode _dropKey;
+    [SerializeField] private KeyCode _holdKey;
     [SerializeField] private KeyCode _readyKey;
     [SerializeField] private Stage _stage;
     
@@ -46,13 +47,15 @@ public class Player : MonoBehaviour
 
         if (Input.GetKeyDown(_leftKey))
             _stage.TryMoveBlock(Direction.Left);
-        else if (Input.GetKeyDown(_downKey))
+        if (Input.GetKeyDown(_downKey))
             _stage.TryMoveBlock(Direction.Down);
-        else if (Input.GetKeyDown(_rightKey))
+        if (Input.GetKeyDown(_rightKey))
             _stage.TryMoveBlock(Direction.Right);
-        else if (Input.GetKeyDown(_rotateKey))
+        if (Input.GetKeyDown(_rotateKey))
             _stage.RotateBlock();
-        else if (Input.GetKeyDown(_dropKey))
+        if (Input.GetKeyDown(_holdKey))
+            _stage.HoldBlock();
+        if (Input.GetKeyDown(_dropKey))
             _stage.DropBlock();
     }
 
