@@ -1,5 +1,5 @@
 using UnityEngine;
-using Random = UnityEngine.Random;
+using Random = System.Random;
 
 public enum Direction
 {
@@ -39,6 +39,8 @@ public class TetrisDefine : SingletonBehaviour<TetrisDefine>
     
     public TetrisBlock[] tetrisBlocks;
 
+    private Random random = new Random();
+
     protected override void Awake()
     {
         base.Awake();
@@ -51,7 +53,7 @@ public class TetrisDefine : SingletonBehaviour<TetrisDefine>
 
     public TetrisBlock GetRandomTetrisBlock()
     {
-        int randomIndex = Random.Range(0, tetrisBlocks.Length);
+        int randomIndex = random.Next(0, tetrisBlocks.Length);
         return tetrisBlocks[randomIndex];
     }
 }

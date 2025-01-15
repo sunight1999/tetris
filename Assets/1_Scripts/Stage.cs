@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Random = UnityEngine.Random;
+using Random = System.Random;
 
 public class Stage : MonoBehaviour
 {
@@ -38,6 +38,8 @@ public class Stage : MonoBehaviour
     private Player player = null;
     private List<StageCell> previousStepCellList = new List<StageCell>();
     private Coroutine coroutineStageUpdate = null;
+
+    private Random random = new Random();
     
     private TetrisBlock.BlockShape CurrentBlockShape => currentBlock.blockShapes[currentBlockRotation];
 
@@ -337,7 +339,7 @@ public class Stage : MonoBehaviour
         }
 
         // 장애물 블록 생성
-        int holeIndex = Random.Range(0, TetrisDefine.TetrisStageCols - 1);
+        int holeIndex = random.Next(0, TetrisDefine.TetrisStageCols);
         for (int i = TetrisDefine.TetrisStageRows - obstacleLineNum; i < TetrisDefine.TetrisStageRows; i++)
         {
             int offset = TetrisDefine.TetrisStageCols * i;
