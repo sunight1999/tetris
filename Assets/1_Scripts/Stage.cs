@@ -2,14 +2,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 
 public class Stage : MonoBehaviour
 {
     [SerializeField] private StageCell[] _stage;
-    [SerializeField] private BlockInfo _nextBlockInfo;
-    [SerializeField] private BlockInfo _holdBlockInfo;
+    [SerializeField] private BlockInfoUI nextBlockInfoUI;
+    [SerializeField] private BlockInfoUI holdBlockInfoUI;
     
     [SerializeField] private int _createPositionX = 4;
     [SerializeField] private float _blockDownTime = 1f;
@@ -125,7 +126,7 @@ public class Stage : MonoBehaviour
         
         _currentBlock = TetrisDefine.Instance.tetrisBlocks[blockIndex];
         _nextBlockIndex = Random.Range(0, TetrisDefine.Instance.tetrisBlockImages.Length);
-        _nextBlockInfo.BlockImage.sprite = TetrisDefine.Instance.tetrisBlockImages[_nextBlockIndex]; 
+        nextBlockInfoUI.BlockImage.sprite = TetrisDefine.Instance.tetrisBlockImages[_nextBlockIndex]; 
 
         _currentBlockX = _createPositionX;
         _currentBlockY = 0;
@@ -274,7 +275,7 @@ public class Stage : MonoBehaviour
             DrawStep();
         }
         
-        _holdBlockInfo.BlockImage.sprite = TetrisDefine.Instance.tetrisBlockImages[_holdBlockIndex]; 
+        holdBlockInfoUI.BlockImage.sprite = TetrisDefine.Instance.tetrisBlockImages[_holdBlockIndex]; 
     }
     
     public void DropBlock()

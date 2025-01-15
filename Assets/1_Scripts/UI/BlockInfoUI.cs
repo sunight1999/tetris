@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class BlockInfo : MonoBehaviour
+public class BlockInfoUI : MonoBehaviour
 {
     [field: SerializeField] public Image BlockImage { get; private set; }
 }

@@ -8812,8 +8812,8 @@ MonoBehaviour:
   - {fileID: 8264374032127507746}
   - {fileID: 6942197288038957233}
   - {fileID: 4966266855073526323}
-  _nextBlockInfo: {fileID: 2832337152114193305}
-  _holdBlockInfo: {fileID: 5274681692344915658}
+  nextBlockInfoUI: {fileID: 2832337152114193305}
+  holdBlockInfoUI: {fileID: 5274681692344915658}
   _createPositionX: 4
   _blockDownTime: 0.25
   _lineCompleteTime: 0.5
