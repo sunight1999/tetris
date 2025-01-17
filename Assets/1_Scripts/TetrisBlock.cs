@@ -1,31 +1,38 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [Serializable]
 public class TetrisBlock
 {
-    public int id = -1;
-    public string name = string.Empty;
-    public Color color = Color.gray;
-    public Sprite blockImage = null;
-    public List<BlockShape> blockShapes = null;
+    [field: SerializeField]
+    public string Name { get; private set; } = string.Empty;
+    
+    [field: SerializeField]
+    public TetrisBlockColorType BlockColor { get; private set; } = TetrisBlockColorType.Normal;
+    
+    [field: SerializeField]
+    public Sprite BlockImage { get; private set; } = null;
+    
+    [field: SerializeField]
+    public List<BlockShape> BlockShapes { get; private set; } = null;
     
     public void CaculateAllRotations()
     {
-        bool isValidShape = blockShapes[0].shape.Length == TetrisDefine.TetrisBlockRows * TetrisDefine.TetrisBlockCols; 
+        bool isValidShape = BlockShapes.Count > 0 && BlockShapes[0].shape.Length == TetrisDefine.TetrisBlockRows * TetrisDefine.TetrisBlockCols; 
         if (!isValidShape)
         {
-            Debug.LogWarning($"{name} 블록의 모양이 제대로 정의되어 있지 않습니다.");
+            Debug.LogError($"{Name} 블록의 모양이 제대로 정의되어 있지 않습니다.");
             return;
         }
         
-        blockShapes[0].CaculateSize();
+        BlockShapes[0].CaculateSize();
         
         // 회전시킨 블록 모양을 미리 계산해 저장
         for (int i = 1; i < TetrisDefine.TetrisBlockMaxRotation; i++)
         {
-            blockShapes.Add(blockShapes[i - 1].Rotate());
+            BlockShapes.Add(BlockShapes[i - 1].Rotate());
         }
     }
     

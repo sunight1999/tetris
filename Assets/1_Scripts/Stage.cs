@@ -1,12 +1,16 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = System.Random;
 
-public class Stage : MonoBehaviour
+public class Stage : MonoBehaviour, IPunObservable
 {
     [SerializeField]
-    private StageCell[] stage = null;
+    private StageCell[] stageArray = null;
     
     [SerializeField]
     private BlockInfoUI nextBlockInfoUI = null;
@@ -33,24 +37,68 @@ public class Stage : MonoBehaviour
     private int currentHighestY = 0;
     private int currentBlockRotation = 0;
 
-    private List<int> completedLines = new List<int>();
+    private List<int> completedLineList = new List<int>();
     
-    private Player player = null;
+    private Player assignedPlayer = null;
+    private TetrisPlayer assignedTetrisPlayer = null;
     private List<StageCell> previousStepCellList = new List<StageCell>();
     private Coroutine coroutineStageUpdate = null;
 
     private Random random = new Random();
+
+    public StageCell[] StageArray => stageArray;
+    private TetrisBlock.BlockShape CurrentBlockShape => currentBlock.BlockShapes[currentBlockRotation];
+
+    private TetrisPlayer AssignedTetrisPlayer
+    {
+        get
+        {
+            if (assignedTetrisPlayer == null)
+            {
+                assignedTetrisPlayer = (TetrisPlayer)assignedPlayer.TagObject;
+            }
+
+            return assignedTetrisPlayer;
+        }
+    }
     
-    private TetrisBlock.BlockShape CurrentBlockShape => currentBlock.blockShapes[currentBlockRotation];
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(StageDataSerializer.Serialize(stageArray));
+        }
+        else
+        {
+            StageCell[] receivedStageArray = StageDataSerializer.Deserialize((byte[])stream.ReceiveNext());
+            ForceUpdateStage(receivedStageArray);
+        }
+    }
+    
+    public void OnGameStart()
+    {
+        Init();
+
+        if (assignedPlayer.IsLocal)
+        {
+            coroutineStageUpdate = StartCoroutine(StageUpdateCoroutine());
+        }
+    }
+
+    public void OnGameEnd()
+    {
+        StopCoroutine(coroutineStageUpdate);
+        coroutineStageUpdate = null;
+    }
 
     public void Init()
     {
         isPlacing = false;
         currentHighestY = TetrisDefine.TetrisStageRows - 1;
-        completedLines.Clear();
+        completedLineList.Clear();
         previousStepCellList.Clear();
 
-        foreach (StageCell stageCell in stage)
+        foreach (StageCell stageCell in stageArray)
         {
             stageCell.Reset();
         }
@@ -61,21 +109,30 @@ public class Stage : MonoBehaviour
         }
     }
 
-    public void SetPlayer(Player inPlayer)
+    public void SetPlayer(Player player)
     {
-        player = inPlayer;
-    }
-    
-    public void Play()
-    {
-        Init();
-        coroutineStageUpdate = StartCoroutine(StageUpdateCoroutine());
+        assignedPlayer = player;
     }
 
-    public void Stop()
+    private void ForceUpdateStage(StageCell[] newStageArray)
     {
-        StopCoroutine(coroutineStageUpdate);
-        coroutineStageUpdate = null;
+        if (stageArray.Length != newStageArray.Length)
+        {
+            Debug.LogWarning($"전달받은 스테이지 정보가 유효하지 않습니다. (newStageArray.Length={newStageArray.Length})");
+            return;
+        }
+        
+        for (int i = 0; i < stageArray.Length; i++)
+        {
+            StageCell stageCell = stageArray[i];
+            StageCell newStageCell = newStageArray[i];
+            
+            stageCell.Reset();
+            if (newStageArray[i].IsBlocked)
+            {
+                stageCell.SetBlock(newStageCell.TetrisBlockColor);
+            }
+        }
     }
 
     private IEnumerator StageUpdateCoroutine()
@@ -110,7 +167,7 @@ public class Stage : MonoBehaviour
                     // 블록이 천장에 닿아 게임 오버 
                     if (currentHighestY == 0)
                     {
-                        GameManager.Instance.SetLose(player);
+                        GameManager.Instance.SetLose(assignedPlayer);
                         break;
                     }
                 }
@@ -158,10 +215,10 @@ public class Stage : MonoBehaviour
         return true;
     }
     
-    public void RotateBlock()
+    public void TryRotateBlock()
     {
         int nextRotation = (currentBlockRotation + 1) % TetrisDefine.TetrisBlockMaxRotation;
-        TetrisBlock.BlockShape rotatedBlockShape = currentBlock.blockShapes[nextRotation];
+        TetrisBlock.BlockShape rotatedBlockShape = currentBlock.BlockShapes[nextRotation];
         
         int rotatedBlockX = currentBlockX;
         int rotatedBlockY = currentBlockY;
@@ -215,7 +272,7 @@ public class Stage : MonoBehaviour
             DrawStep();
         }
 
-        holdBlockInfoUI.BlockImage.sprite = holdBlock.blockImage;
+        holdBlockInfoUI.BlockImage.sprite = holdBlock.BlockImage;
     }
     
     public void DropBlock()
@@ -242,7 +299,7 @@ public class Stage : MonoBehaviour
         
         currentBlock = targetBlock;
         nextBlock = TetrisDefine.Instance.GetRandomTetrisBlock();
-        nextBlockInfoUI.BlockImage.sprite = nextBlock.blockImage;
+        nextBlockInfoUI.BlockImage.sprite = nextBlock.BlockImage;
         
         currentBlockX = createPositionX;
         currentBlockY = 0;
@@ -266,7 +323,7 @@ public class Stage : MonoBehaviour
                     continue;
                 }
 
-                StageCell stageCell = stage[offset + currentBlockX + j];
+                StageCell stageCell = stageArray[offset + currentBlockX + j];
                 stageCell.SetBlockTemporarily(currentBlock);
                 previousStepCellList.Add(stageCell);
             }
@@ -286,7 +343,7 @@ public class Stage : MonoBehaviour
 
     private bool CheckCollision(TetrisBlock block, int blockPositionX, int blockPositionY, int blockRotation)
     {
-        TetrisBlock.BlockShape blockShape = block.blockShapes[blockRotation];
+        TetrisBlock.BlockShape blockShape = block.BlockShapes[blockRotation];
         
         // 검사할 위치가 스테이지를 벗어나는지 확인
         if (blockPositionX < 0 || blockPositionX + blockShape.width > TetrisDefine.TetrisStageCols ||
@@ -306,7 +363,7 @@ public class Stage : MonoBehaviour
                     continue;
                 }
 
-                StageCell stageCell = stage[offset + blockPositionX + j];
+                StageCell stageCell = stageArray[offset + blockPositionX + j];
                 if (stageCell.IsBlocked)
                 {
                     return true;
@@ -350,8 +407,8 @@ public class Stage : MonoBehaviour
                     continue;
                 }
 
-                StageCell stageCell = stage[offset + j];
-                stageCell.SetBlock(TetrisDefine.ObstacleCellColor);
+                StageCell stageCell = stageArray[offset + j];
+                stageCell.SetBlock(TetrisBlockColorType.Obstacle);
             }
         }
 
@@ -373,7 +430,7 @@ public class Stage : MonoBehaviour
             int offset = TetrisDefine.TetrisStageCols * i;
             for (int j = 0; j < TetrisDefine.TetrisStageCols; j++)
             {
-                StageCell stageCell = stage[offset + j];
+                StageCell stageCell = stageArray[offset + j];
                 if (!stageCell.IsBlocked)
                 {
                     isCompleted = false;
@@ -383,12 +440,12 @@ public class Stage : MonoBehaviour
 
             if (isCompleted)
             {
-                completedLines.Add(i);
+                completedLineList.Add(i);
             }
         }
 
         // 완성된 라인이 있다면 제거 후 스테이지 정리
-        if (completedLines.Count > 0)
+        if (completedLineList.Count > 0)
         {
             CompleteLines();
             yield return new WaitForSeconds(lineCompleteTime);
@@ -398,9 +455,9 @@ public class Stage : MonoBehaviour
 
         // 블록을 쌓는 동안 받은 공격이 있다면 모두 처리
         int obstacleLineNum = 0;
-        while (player.HitQueue.Count > 0)
+        while (AssignedTetrisPlayer.HitQueue.Count > 0)
         {
-            obstacleLineNum += player.HitQueue.Dequeue();
+            obstacleLineNum += AssignedTetrisPlayer.HitQueue.Dequeue();
         }
         
         AddObstacleLines(obstacleLineNum);
@@ -411,37 +468,38 @@ public class Stage : MonoBehaviour
 
     private void CompleteLines()
     {
-        foreach (int line in completedLines)
+        foreach (int line in completedLineList)
         {
             int offset = TetrisDefine.TetrisStageCols * line;
             for (int i = 0; i < TetrisDefine.TetrisStageCols; i++)
             {
-                StageCell stageCell = stage[offset + i];
+                StageCell stageCell = stageArray[offset + i];
                 stageCell.Reset();
             }
         }
         
         // 완성한 줄이 2줄 이상일 경우 완성한 줄 - 1개의 장애물 블록을 상대방에게 공격
-        if (completedLines.Count > 1)
+        if (completedLineList.Count > 1)
         {
-            GameManager.Instance.AttackTo(player, completedLines.Count - 1);
+            TetrisPlayer player = (TetrisPlayer)assignedPlayer.TagObject;
+            player.Attack(completedLineList.Count - 1);
         }
     }
     
     private void AdjustLines()
     {
-        if (completedLines.Count == 0)
+        if (completedLineList.Count == 0)
             return;
 
-        int adjustRangeBottom = completedLines[0];
+        int adjustRangeBottom = completedLineList[0];
         int adjustRangeTop = currentHighestY;
         
         // 블록이 있는 라인 중 가장 윗 라인이 완성되면 해당 라인 위로는 블록이 없으므로 블록 검사 범위 축소
-        for (int i = completedLines.Count - 1; i >= 0; i--)
+        for (int i = completedLineList.Count - 1; i >= 0; i--)
         {
-            if (completedLines[i] == adjustRangeTop)
+            if (completedLineList[i] == adjustRangeTop)
             {
-                completedLines.Remove(i);
+                completedLineList.Remove(i);
                 --adjustRangeTop;
             }
         }
@@ -450,7 +508,7 @@ public class Stage : MonoBehaviour
         int tailLine = adjustRangeBottom - 1;
         while (tailLine >= adjustRangeTop)
         {
-            if (completedLines.Contains(tailLine))
+            if (completedLineList.Contains(tailLine))
             {
                 --tailLine;
                 continue;
@@ -462,25 +520,24 @@ public class Stage : MonoBehaviour
             --headLine;
         }
         
-        currentHighestY += completedLines.Count;
-        completedLines.Clear();
+        currentHighestY += completedLineList.Count;
+        completedLineList.Clear();
     }
 
     private void SwapLine(int fromLine, int toLine)
     {
         for (int i = 0; i < TetrisDefine.TetrisStageCols; i++)
         {
-            StageCell fromStageCell = stage[TetrisDefine.TetrisStageCols * fromLine + i];
-            StageCell toStageCell = stage[TetrisDefine.TetrisStageCols * toLine + i];
+            StageCell fromStageCell = stageArray[TetrisDefine.TetrisStageCols * fromLine + i];
+            StageCell toStageCell = stageArray[TetrisDefine.TetrisStageCols * toLine + i];
 
             if (!fromStageCell.IsBlocked)
             {
                 continue;
             }
             
-            Color color = fromStageCell.GetBlockColor();
             fromStageCell.Reset();
-            toStageCell.SetBlock(color);
+            toStageCell.SetBlock(fromStageCell.TetrisBlockColor);
         }
     }
 #endregion

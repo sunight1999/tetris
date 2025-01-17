@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = System.Random;
 
 public enum Direction
@@ -11,7 +13,8 @@ public enum Direction
 public enum GameState
 {
     Idle,
-    Playing
+    Playing,
+    Pause
 }
 
 public enum MenuType
@@ -20,9 +23,59 @@ public enum MenuType
     Countdown
 }
 
+public enum PlayerInitDataType
+{
+    Stage,
+    StateInfo
+}
+
+public enum PlayerInputType
+{
+    LeftKeyDowned,
+    DownKeyDowned,
+    RightKeyDowned,
+    RotateKeyDowned,
+    HoldKeyDowned,
+    DropKeyDowned,
+    ReadyKeyDowned,
+}
+
+public enum TetrisBlockColorType
+{
+    Normal,
+    Obstacle,
+    Red,
+    Yellow,
+    Green,
+    Orange,
+    Sky,
+    Purple,
+    Blue
+}
+
+[Serializable]
+public struct PlayerInitData
+{
+    public Stage stage;
+    public StateInfo stateInfo;
+
+    public object[] GetInitData()
+    {
+        return new object[]
+        {
+            stage,
+            stateInfo
+        };
+    }
+}
+
 public class TetrisDefine : SingletonBehaviour<TetrisDefine>
 {
+    public const string PlayerLoadedLevelProperty = "PlayerLoadedLevel";
+    public const string PlayerIsReadyProperty = "PlayerIsReady";
+    
     public const int PlayerCount = 2;
+    public const float PlayerSearchingInterval = .5f;
 
     public const int TetrisStageRows = 20;
     public const int TetrisStageCols = 10;
@@ -33,11 +86,22 @@ public class TetrisDefine : SingletonBehaviour<TetrisDefine>
     public const int TetrisBlockCols = 4;
 
     public const int InvalidIndex = -1;
+
+    public static readonly Color[] tetrisBlockColors = new Color[]
+    {
+        new Color(0f, 0f, 0f, 0.5f),
+        new Color(0.2f, 0.2f, 0.2f, 1f),
+        new Color(0.8f, 0f, 0f, 1f),
+        new Color(0.8f, 0.8f, 0f, 1f),
+        new Color(0f, 0.8f, 0.18f, 1f),
+        new Color(0.85f, 0.45f, 0f, 1f),
+        new Color(0f, 0.85f, 0.78f, 1f),
+        new Color(0.5f, 0f, 0.85f, 1f),
+        new Color(0f, 0.44f, 0.85f, 1f),
+    };
     
-    public static readonly Color NormalCellColor = new Color(0f, 0f, 0f, 0.5f);
-    public static readonly Color ObstacleCellColor = new Color(0.2f, 0.2f, 0.2f, 1f);
-    
-    public TetrisBlock[] tetrisBlocks;
+    // TODO: 블록 정보 json으로 정의하고 로딩하기
+    public TetrisBlock[] tetrisBlockArray;
 
     private Random random = new Random();
 
@@ -45,7 +109,7 @@ public class TetrisDefine : SingletonBehaviour<TetrisDefine>
     {
         base.Awake();
 
-        foreach (TetrisBlock tetrisBlock in tetrisBlocks)
+        foreach (TetrisBlock tetrisBlock in tetrisBlockArray)
         {
             tetrisBlock.CaculateAllRotations();
         }
@@ -53,7 +117,7 @@ public class TetrisDefine : SingletonBehaviour<TetrisDefine>
 
     public TetrisBlock GetRandomTetrisBlock()
     {
-        int randomIndex = random.Next(0, tetrisBlocks.Length);
-        return tetrisBlocks[randomIndex];
+        int randomIndex = random.Next(0, tetrisBlockArray.Length);
+        return tetrisBlockArray[randomIndex];
     }
 }

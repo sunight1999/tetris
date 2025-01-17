@@ -7,6 +7,12 @@ public class StateInfo : MonoBehaviour
     private TextMeshProUGUI readyText = null;
 
     private string readyKey = string.Empty;
+
+    public void Reset()
+    {
+        readyText.text = $"Waiting TetrisPlayer...";
+        readyKey = string.Empty;
+    }
     
     public void Init(string inReadyKey)
     {

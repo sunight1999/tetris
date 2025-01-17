@@ -19,7 +19,7 @@ public class Option : UI
     {
         if (GameManager.Instance.GameState == GameState.Playing)
         {
-            GameManager.Instance.Play();
+            GameManager.Instance.StartGame();
         }
     }
 

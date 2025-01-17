@@ -1,38 +1,38 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
+[Serializable]
 public class StageCell : MonoBehaviour
 {
     [SerializeField]
     private Image cellImage = null;
 
     public bool IsBlocked { get; private set; } = false;
+    public TetrisBlockColorType TetrisBlockColor { get; private set; }
 
     public void Reset()
     {
-        cellImage.color = TetrisDefine.NormalCellColor;
+        cellImage.color = TetrisDefine.tetrisBlockColors[(int)TetrisBlockColorType.Normal];
         IsBlocked = false;
     }
     
     public void SetBlockTemporarily(TetrisBlock block)
     {
-        cellImage.color = block.color;
+        cellImage.color = TetrisDefine.tetrisBlockColors[(int)block.BlockColor];
     }
 
     public void SetBlock(TetrisBlock block)
     {
         IsBlocked = true;
-        cellImage.color = block.color;
+        TetrisBlockColor = block.BlockColor;
+        cellImage.color = TetrisDefine.tetrisBlockColors[(int)block.BlockColor];
     }
 
-    public void SetBlock(Color color)
+    public void SetBlock(TetrisBlockColorType color)
     {
         IsBlocked = true;
-        cellImage.color = color;
-    }
-
-    public Color GetBlockColor()
-    {
-        return cellImage.color;
+        TetrisBlockColor = color;
+        cellImage.color = TetrisDefine.tetrisBlockColors[(int)TetrisBlockColor];
     }
 }
