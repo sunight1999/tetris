@@ -4,11 +4,22 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
+public class StageData
+{
+    public bool isBlocked = false;
+    public TetrisBlockColorType blockColorType = TetrisBlockColorType.Normal;
+
+    public void Reset()
+    {
+        isBlocked = false;
+        blockColorType = TetrisBlockColorType.Normal;
+    }
+}
+
 public class StageDataSerializer
 {
     // TODO: 플레이어가 두 명일땐 상관없지만, 여러 명일 경우 데이터 덮어쓰기 가능성 존재
-    // TODO: StageCell이 MonoBehaviour라 new로 생성 불가능
-    private static StageCell[] deserializedStageArray; 
+    private static StageData[] deserializedStageDataArray = new StageData[TetrisDefine.TetrisStageCellCount];
     
     public static byte[] Serialize(object customObject)
     {
@@ -56,18 +67,23 @@ public class StageDataSerializer
         return stream.ToArray();
     }
 
-    public static StageCell[] Deserialize(byte[] bytes)
+    public static StageData[] Deserialize(byte[] bytes)
     {
         int byteCount = 0;
         int bitCount = 0;
-        int stageCellCount = TetrisDefine.TetrisStageRows * TetrisDefine.TetrisStageCols;
+        int stageCellCount = TetrisDefine.TetrisStageCellCount;
         
         for (int i = 0; i < stageCellCount; i++)
         {
             byte buffer = bytes[byteCount];
-            
-            StageCell stageCell = deserializedStageArray[i];
-            stageCell.Reset();
+
+            StageData stageData = deserializedStageDataArray[i];
+            if (stageData == null)
+            {
+                stageData = new StageData();
+                deserializedStageDataArray[i] = stageData;
+            }
+            stageData.Reset();
 
             bool isBlocked = ((buffer >> bitCount++) & 1) == 1;
             if (!isBlocked)
@@ -89,10 +105,11 @@ public class StageDataSerializer
                 int bit = (buffer >> bitCount) & 1;
                 tetrisBlockColorIndex |= bit << bitCount++;
             }
-            
-            stageCell.SetBlock((TetrisBlockColorType)tetrisBlockColorIndex);
+
+            stageData.isBlocked = isBlocked;
+            stageData.blockColorType = (TetrisBlockColorType)tetrisBlockColorIndex;
         }
 
-        return deserializedStageArray;
+        return deserializedStageDataArray;
     }
 }

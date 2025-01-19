@@ -53,24 +53,16 @@ public enum TetrisBlockColorType
     Blue
 }
 
-[Serializable]
-public struct PlayerInitData
+public enum TetrisEventCode : byte
 {
-    public Stage stage;
-    public StateInfo stateInfo;
-
-    public object[] GetInitData()
-    {
-        return new object[]
-        {
-            stage,
-            stateInfo
-        };
-    }
+    AllPlayerLoadedLevelEvent,
+    AllPlayerIsReadyEvent,
+    GameEndEvent
 }
 
 public class TetrisDefine : SingletonBehaviour<TetrisDefine>
 {
+    // 플레이어 커스텀 프로퍼티 키
     public const string PlayerLoadedLevelProperty = "PlayerLoadedLevel";
     public const string PlayerIsReadyProperty = "PlayerIsReady";
     
@@ -79,11 +71,13 @@ public class TetrisDefine : SingletonBehaviour<TetrisDefine>
 
     public const int TetrisStageRows = 20;
     public const int TetrisStageCols = 10;
-    
+    public const int TetrisStageCellCount = TetrisDefine.TetrisStageRows * TetrisDefine.TetrisStageCols;
+
     public const int TetrisBlockMaxRotation = 4;
     public const int TetrisBlockCount = 7;
     public const int TetrisBlockRows = 4;
     public const int TetrisBlockCols = 4;
+    public const int TetrisBlockCellCount = TetrisDefine.TetrisBlockRows * TetrisDefine.TetrisBlockCols;
 
     public const int InvalidIndex = -1;
 

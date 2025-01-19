@@ -4,7 +4,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
 
-public class TetrisPlayer : MonoBehaviourPun
+public class TetrisPlayer : MonoBehaviourPun, IPunInstantiateMagicCallback 
 {
     private Stage stage = null;
     private PlayerInput playerInput = null;
@@ -33,7 +33,12 @@ public class TetrisPlayer : MonoBehaviourPun
         GameManager.Instance.StartGameEvent -= OnStartGame;
         GameManager.Instance.EndGameEvent -= OnEndGame;
     }
-    
+
+    public void OnPhotonInstantiate(PhotonMessageInfo info)
+    {
+        info.Sender.TagObject = this;
+    }
+
     public void OnStartGame()
     {
         // 다음 게임을 위해 준비 상태를 false로 전환
@@ -48,10 +53,12 @@ public class TetrisPlayer : MonoBehaviourPun
         stage.OnGameEnd();
     }
 
-    public void Init(PlayerInitData playerInitData)
+    public void Init(Stage inStage, StateInfo inStateInfo)
     {
-        stage = playerInitData.stage;
-        stateInfo = playerInitData.stateInfo;
+        stage = inStage;
+        stateInfo = inStateInfo;
+
+        stateInfo.Init(playerInput.ReadyKey.ToString());
     }
     
     public void Ready()

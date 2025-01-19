@@ -70,8 +70,8 @@ public class Stage : MonoBehaviour, IPunObservable
         }
         else
         {
-            StageCell[] receivedStageArray = StageDataSerializer.Deserialize((byte[])stream.ReceiveNext());
-            ForceUpdateStage(receivedStageArray);
+            StageData[] receivedStageDataArray = StageDataSerializer.Deserialize((byte[])stream.ReceiveNext());
+            ForceUpdateStage(receivedStageDataArray);
         }
     }
     
@@ -91,7 +91,12 @@ public class Stage : MonoBehaviour, IPunObservable
         coroutineStageUpdate = null;
     }
 
-    public void Init()
+    public void SetPlayer(Player player)
+    {
+        assignedPlayer = player;
+    }
+
+    private void Init()
     {
         isPlacing = false;
         currentHighestY = TetrisDefine.TetrisStageRows - 1;
@@ -109,28 +114,22 @@ public class Stage : MonoBehaviour, IPunObservable
         }
     }
 
-    public void SetPlayer(Player player)
+    private void ForceUpdateStage(StageData[] newStageDataArray)
     {
-        assignedPlayer = player;
-    }
-
-    private void ForceUpdateStage(StageCell[] newStageArray)
-    {
-        if (stageArray.Length != newStageArray.Length)
+        if (stageArray.Length != newStageDataArray.Length)
         {
-            Debug.LogWarning($"전달받은 스테이지 정보가 유효하지 않습니다. (newStageArray.Length={newStageArray.Length})");
+            Debug.LogWarning($"전달받은 스테이지 정보가 유효하지 않습니다. (newStageArray.Length={newStageDataArray.Length})");
             return;
         }
         
         for (int i = 0; i < stageArray.Length; i++)
         {
             StageCell stageCell = stageArray[i];
-            StageCell newStageCell = newStageArray[i];
             
             stageCell.Reset();
-            if (newStageArray[i].IsBlocked)
+            if (newStageDataArray[i].isBlocked)
             {
-                stageCell.SetBlock(newStageCell.TetrisBlockColor);
+                stageCell.SetBlock(newStageDataArray[i].blockColorType);
             }
         }
     }

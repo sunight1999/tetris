@@ -3,6 +3,13 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [Serializable]
+public class StageCellData
+{
+    public bool isBlocked = false;
+    public TetrisBlockColorType tetrisBlockColor = TetrisBlockColorType.Normal;
+}
+
+[Serializable]
 public class StageCell : MonoBehaviour
 {
     [SerializeField]

@@ -4,11 +4,12 @@ using System.Collections.Generic;
 using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
+using Unity.Properties;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
-public class GameManager : SingletonBehaviourPunCallbacks<GameManager>
+public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEventCallback
 {
     public event Action StartGameEvent;
     public event Action PauseGameEvent;
@@ -32,11 +33,15 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>
 
     private void Start()
     {
-        Hashtable props = new Hashtable()
-        {
-            { TetrisDefine.PlayerLoadedLevelProperty, true }
-        };
-        PhotonNetwork.SetPlayerCustomProperties(props);
+        if (PhotonNetwork.NetworkClientState == ClientState.Joining)
+            return;
+
+        TryCreatePlayer();
+    }
+
+    public override void OnJoinedRoom()
+    {
+        TryCreatePlayer();
     }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
@@ -48,30 +53,21 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>
     {
         Debug.Log($"{otherPlayer.NickName}이 게임을 떠났습니다.");
     }
-    
+
     public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
     {
+        if (!PhotonNetwork.IsMasterClient)
+            return;
+
         // 플레이어의 씬 로딩이 끝나면 플레이어 오브젝트 생성 및 초기화 진행
         if (changedProps.TryGetValue(TetrisDefine.PlayerLoadedLevelProperty, out object loadedLevelValue))
         {
-            bool isPlayerLoadedLevel = (bool)loadedLevelValue;
-            if (isPlayerLoadedLevel)
+            if (CheckAllPlayerLoadedLevel())
             {
-                PlayerInitData playerInitData = new PlayerInitData();
-                if (targetPlayer.IsLocal)
-                {
-                    playerInitData.stage = stageArray[0];
-                    playerInitData.stateInfo = stateInfoArray[0];
-                }
-                else
-                {
-                    playerInitData.stage = stageArray[1];
-                    playerInitData.stateInfo = stateInfoArray[1];
-                }
-                
-                GameObject playerObject = PhotonNetwork.Instantiate(playerPrefab.name, Vector3.zero, Quaternion.identity, 0);
-                TetrisPlayer tetrisPlayer = playerObject.GetComponent<TetrisPlayer>();
-                tetrisPlayer.Init(playerInitData);
+                // 이벤트 레이즈
+                RaiseEventOptions raiseEventOptions = new RaiseEventOptions() { Receivers = ReceiverGroup.All };
+                SendOptions sendOptions = new SendOptions() { Reliability = true };
+                PhotonNetwork.RaiseEvent((byte)TetrisEventCode.AllPlayerLoadedLevelEvent, null, raiseEventOptions, sendOptions);
             }
         }
 
@@ -84,7 +80,19 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>
             }
         }
     }
-    
+
+    public void OnEvent(EventData photonEvent)
+    {
+        switch ((TetrisEventCode)photonEvent.Code)
+        {
+            case TetrisEventCode.AllPlayerLoadedLevelEvent:
+                break;
+
+            case TetrisEventCode.AllPlayerIsReadyEvent:
+                break;
+        }
+    }
+
     public void StartGame()
     {
         GameState = GameState.Playing;
@@ -119,13 +127,33 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>
         }
     }
 
+    private void TryCreatePlayer()
+    {
+        if (PhotonNetwork.LocalPlayer.TagObject != null)
+            return;
+
+        GameObject playerObject = PhotonNetwork.Instantiate(playerPrefab.name, Vector3.zero, Quaternion.identity, 0);
+        TetrisPlayer tetrisPlayer = playerObject.GetComponent<TetrisPlayer>();
+        tetrisPlayer.Init(stageArray[0], stateInfoArray[0]);
+    }
+
+    private bool CheckAllPlayerLoadedLevel()
+    {
+        return CheckAllPlayerIs(TetrisDefine.PlayerLoadedLevelProperty, true);
+    }
+
     private bool CheckAllPlayerIsReady()
+    {
+        return CheckAllPlayerIs(TetrisDefine.PlayerIsReadyProperty, true);
+    }
+
+    private bool CheckAllPlayerIs(string propertyKey, bool isValue)
     {
         foreach (Player player in PhotonNetwork.PlayerList)
         {
-            if (player.CustomProperties.TryGetValue(TetrisDefine.PlayerIsReadyProperty, out object readyValue))
+            if (player.CustomProperties.TryGetValue(propertyKey, out object readyValue))
             {
-                if ((bool)readyValue)
+                if ((bool)readyValue == isValue)
                 {
                     continue;
                 }

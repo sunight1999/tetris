@@ -20,7 +20,7 @@ public class TetrisBlock
     
     public void CaculateAllRotations()
     {
-        bool isValidShape = BlockShapes.Count > 0 && BlockShapes[0].shape.Length == TetrisDefine.TetrisBlockRows * TetrisDefine.TetrisBlockCols; 
+        bool isValidShape = BlockShapes.Count > 0 && BlockShapes[0].shape.Length == TetrisDefine.TetrisBlockCellCount; 
         if (!isValidShape)
         {
             Debug.LogError($"{Name} 블록의 모양이 제대로 정의되어 있지 않습니다.");
@@ -45,7 +45,7 @@ public class TetrisBlock
     
         public BlockShape()
         {
-            shape = new bool[TetrisDefine.TetrisBlockRows * TetrisDefine.TetrisBlockCols];
+            shape = new bool[TetrisDefine.TetrisBlockCellCount];
         }
         
         /// <summary>
