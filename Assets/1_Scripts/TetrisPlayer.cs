@@ -95,16 +95,21 @@ public class TetrisPlayer : MonoBehaviourPun, IPunInstantiateMagicCallback
     {
         foreach (Player player in PhotonNetwork.PlayerList)
         {
-            if (player != PhotonNetwork.LocalPlayer)
+            if (!player.IsLocal)
             {
+                // 로컬에선 다른 플레이어의 HitQueue를 직접 처리하지 않고 스테이지 정보를 통째로 받아오므로 RpcTarget.Others 사용
                 TetrisPlayer tetrisPlayer = (TetrisPlayer)player.TagObject;
-                tetrisPlayer.Hit(obstacleNum);
+                tetrisPlayer.photonView.RPC("Hit", RpcTarget.Others, obstacleNum);
+                break;
             }
         }
     }
     
+    [PunRPC]
     public void Hit(int obstacleNum)
     {
+        Debug.Log(obstacleNum);
+        
         HitQueue.Enqueue(obstacleNum);
     }
 }

@@ -288,16 +288,24 @@ public class Stage : MonoBehaviourPun, IPunObservable
     
     public void DropBlock()
     {
-        // 제일 밑에서부터 블록을 배치할 수 있는 위치 탐색
-        for (int i = TetrisDefine.TetrisStageRows - CurrentBlockShape.height; i > currentBlockY + CurrentBlockShape.height; i--)
+        // 현재 위치에서부터 블록을 배치할 수 있는 위치 탐색
+        int i = currentBlockY; 
+        for (; i < TetrisDefine.TetrisStageRows - CurrentBlockShape.height; i++)
         {
-            if (!CheckCollision(currentBlock, currentBlockX, i, currentBlockRotation))
+            if (CheckCollision(currentBlock, currentBlockX, i, currentBlockRotation))
             {
-                currentBlockY = i;
-                ClearPreviousStep();
-                DrawStep();
+                break;
             }
         }
+        
+        // 드랍 위치가 현재 위치와 동일하지 않은 경우, i가 충돌이 감지된 위치이므로 -1 수행
+        if (i != currentBlockY)
+        {
+            currentBlockY = i - 1;
+        }
+        
+        ClearPreviousStep();
+        DrawStep();
     }
 
     private void CreateBlock(TetrisBlock targetBlock = null)
