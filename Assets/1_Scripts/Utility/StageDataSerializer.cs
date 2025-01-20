@@ -28,7 +28,7 @@ public class StageDataSerializer
         byte buffer = 0;
         int bitCount = 0;
         
-        // 1 StageCell = 1 bit (StageCell.IsBlock) + 4 bit (StageCell.TetrisBlockColor) = 5 bit
+        // 1 StageCell = 1 bit (StageCell.IsBlock || StageCell.IsTemporarilyBlocked) + 4 bit (StageCell.TetrisBlockColor) = 5 bit
         for (int i = 0; i < stageArray.Length; i++)
         {
             if (bitCount == 8)
@@ -39,28 +39,33 @@ public class StageDataSerializer
             }
             
             StageCell stageCell = stageArray[i]; 
-            if (!stageCell.IsBlocked)
+            if (!stageCell.IsBlocked && !stageCell.IsTemporarilyBlocked)
             {
                 ++bitCount;
                 continue;
             }
+            
+            // 로컬에서 상대방 stage에 대해 충돌 처리를 진행하지 않으므로 IsBlocked와 IsTemporarilyBlocked를 구분하지 않고 모두 1로 설정
             buffer |= (byte)(1 << bitCount++);
 
             // TetrisBlockColor의 개수가 충분히 적으므로 4비트만 할당
             int tetrisBlockColorIndex = (int)stageCell.TetrisBlockColor;
             for (int j = 0; j < 4; j++)
             {
-                int bit = (tetrisBlockColorIndex >> j) & 1;
-                buffer |= (byte)(bit << bitCount++);
-
                 if (bitCount == 8)
                 {
                     byteList.Add(buffer);
                     buffer = 0;
                     bitCount = 0;
                 }
+                
+                int bit = (tetrisBlockColorIndex >> j) & 1;
+                buffer |= (byte)(bit << bitCount++);
             }
         }
+        
+        // 버퍼에 남은 데이터 flush
+        byteList.Add(buffer);
         
         MemoryStream stream = new MemoryStream(sizeof(byte) * byteList.Count);
         stream.Write(byteList.ToArray(), 0, sizeof(byte) * byteList.Count);
@@ -72,10 +77,22 @@ public class StageDataSerializer
         int byteCount = 0;
         int bitCount = 0;
         int stageCellCount = TetrisDefine.TetrisStageCellCount;
+
+        if (bytes.Length < TetrisDefine.TetrisMinPacketSize)
+        {
+            Debug.LogWarning($"유효하지 않은 데이터 길이({bytes.Length})입니다.");
+            return null;
+        }
         
         for (int i = 0; i < stageCellCount; i++)
         {
             byte buffer = bytes[byteCount];
+            if (bitCount == 8)
+            {
+                ++byteCount;
+                bitCount = 0;
+                buffer = bytes[byteCount];
+            }
 
             StageData stageData = deserializedStageDataArray[i];
             if (stageData == null)
@@ -102,8 +119,8 @@ public class StageDataSerializer
                     buffer = bytes[byteCount];
                 }
 
-                int bit = (buffer >> bitCount) & 1;
-                tetrisBlockColorIndex |= bit << bitCount++;
+                int bit = (buffer >> bitCount++) & 1;
+                tetrisBlockColorIndex |= bit << j;
             }
 
             stageData.isBlocked = isBlocked;

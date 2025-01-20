@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [RequireComponent(typeof(TetrisPlayer))]
@@ -31,11 +32,16 @@ public class PlayerInput : MonoBehaviour
         tetrisPlayer = GetComponent<TetrisPlayer>();
     }
 
-    private void Update()
+    private void Start()
     {
         if (!tetrisPlayer.photonView.IsMine)
-            return;
-        
+        {
+            enabled = false;
+        }
+    }
+
+    private void Update()
+    {
         if (GameManager.Instance.GameState == GameState.Pause)
             return;
         
@@ -43,7 +49,7 @@ public class PlayerInput : MonoBehaviour
         {
             if (Input.GetKeyDown(ReadyKey))
             {
-                tetrisPlayer.Ready();
+                tetrisPlayer.SetReady(true);
             }
         }
         

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
@@ -9,8 +10,7 @@ public class TetrisPlayer : MonoBehaviourPun, IPunInstantiateMagicCallback
     private Stage stage = null;
     private PlayerInput playerInput = null;
     private StateInfo stateInfo = null;
-    
-    public bool IsReady { get; private set; } = false;
+
     public Queue<int> HitQueue = new Queue<int>();
 
     public Stage Stage => stage;
@@ -29,7 +29,7 @@ public class TetrisPlayer : MonoBehaviourPun, IPunInstantiateMagicCallback
     private void OnDisable()
     {
         stateInfo.Reset();
-        
+
         GameManager.Instance.StartGameEvent -= OnStartGame;
         GameManager.Instance.EndGameEvent -= OnEndGame;
     }
@@ -37,13 +37,13 @@ public class TetrisPlayer : MonoBehaviourPun, IPunInstantiateMagicCallback
     public void OnPhotonInstantiate(PhotonMessageInfo info)
     {
         info.Sender.TagObject = this;
+
+        PlayerInitData playerInitData = GameManager.Instance.GetPlayerInitData(info.Sender);
+        Init(playerInitData);
     }
 
     public void OnStartGame()
     {
-        // 다음 게임을 위해 준비 상태를 false로 전환
-        IsReady = false;
-        
         stage.OnGameStart();
         stateInfo.Disable();
     }
@@ -53,18 +53,30 @@ public class TetrisPlayer : MonoBehaviourPun, IPunInstantiateMagicCallback
         stage.OnGameEnd();
     }
 
-    public void Init(Stage inStage, StateInfo inStateInfo)
+    public void Init(PlayerInitData playerInitData)
     {
-        stage = inStage;
-        stateInfo = inStateInfo;
+        stage = playerInitData.stage;
+        stateInfo = playerInitData.stateInfo;
 
+        stage.SetPlayer(playerInitData.player);
         stateInfo.Init(playerInput.ReadyKey.ToString());
     }
-    
-    public void Ready()
+
+    public void SetReady(bool isReady)
     {
-        IsReady = true;
-        stateInfo.Ready();
+        Hashtable readyPropertyHashTable = new Hashtable()
+        {
+            { TetrisDefine.PlayerIsReadyProperty, isReady }
+        };
+        PhotonNetwork.SetPlayerCustomProperties(readyPropertyHashTable);
+    }
+
+    public void SetReadyUI(bool isReady)
+    {
+        if (isReady)
+        {
+            stateInfo.Ready();
+        }
     }
 
     public void Win()

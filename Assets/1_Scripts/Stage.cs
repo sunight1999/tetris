@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using Random = System.Random;
 
-public class Stage : MonoBehaviour, IPunObservable
+public class Stage : MonoBehaviourPun, IPunObservable
 {
     [SerializeField]
     private StageCell[] stageArray = null;
@@ -61,17 +61,26 @@ public class Stage : MonoBehaviour, IPunObservable
             return assignedTetrisPlayer;
         }
     }
-    
+
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
+        if (assignedPlayer == null || GameManager.Instance.GameState != GameState.Playing)
+            return;
+
         if (stream.IsWriting)
         {
             stream.SendNext(StageDataSerializer.Serialize(stageArray));
         }
         else
         {
+            if (assignedPlayer.IsLocal)
+                return;
+            
             StageData[] receivedStageDataArray = StageDataSerializer.Deserialize((byte[])stream.ReceiveNext());
-            ForceUpdateStage(receivedStageDataArray);
+            if (receivedStageDataArray != null)
+            {
+                ForceUpdateStage(receivedStageDataArray);
+            }
         }
     }
     
@@ -87,7 +96,10 @@ public class Stage : MonoBehaviour, IPunObservable
 
     public void OnGameEnd()
     {
-        StopCoroutine(coroutineStageUpdate);
+        if (coroutineStageUpdate != null)
+        {
+            StopCoroutine(coroutineStageUpdate);
+        }
         coroutineStageUpdate = null;
     }
 
@@ -480,8 +492,7 @@ public class Stage : MonoBehaviour, IPunObservable
         // 완성한 줄이 2줄 이상일 경우 완성한 줄 - 1개의 장애물 블록을 상대방에게 공격
         if (completedLineList.Count > 1)
         {
-            TetrisPlayer player = (TetrisPlayer)assignedPlayer.TagObject;
-            player.Attack(completedLineList.Count - 1);
+            AssignedTetrisPlayer.Attack(completedLineList.Count - 1);
         }
     }
     

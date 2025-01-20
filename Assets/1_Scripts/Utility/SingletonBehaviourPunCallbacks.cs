@@ -1,7 +1,7 @@
 using Photon.Pun;
 using UnityEngine;
 
-
+// TODO: 싱글톤이 파괴된 이후에 참조되는 경우(특히 게임 종료 시)를 막기 위해 IsAlive 속성 필요
 public class SingletonBehaviourPunCallbacks<T> : MonoBehaviourPunCallbacks where T : MonoBehaviourPunCallbacks
 {
     private static T instance = null;

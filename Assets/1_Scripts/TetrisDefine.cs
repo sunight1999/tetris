@@ -1,4 +1,5 @@
 using System;
+using Photon.Realtime;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Random = System.Random;
@@ -55,9 +56,22 @@ public enum TetrisBlockColorType
 
 public enum TetrisEventCode : byte
 {
-    AllPlayerLoadedLevelEvent,
     AllPlayerIsReadyEvent,
     GameEndEvent
+}
+
+public struct PlayerInitData
+{
+    public Player player;
+    public Stage stage;
+    public StateInfo stateInfo;
+
+    public PlayerInitData(Player inPlayer, Stage inStage, StateInfo inStateInfo)
+    {
+        player = inPlayer;
+        stage = inStage;
+        stateInfo = inStateInfo;
+    }
 }
 
 public class TetrisDefine : SingletonBehaviour<TetrisDefine>
@@ -79,6 +93,9 @@ public class TetrisDefine : SingletonBehaviour<TetrisDefine>
     public const int TetrisBlockCols = 4;
     public const int TetrisBlockCellCount = TetrisDefine.TetrisBlockRows * TetrisDefine.TetrisBlockCols;
 
+    public const int TetrisMinPacketSize = TetrisStageCellCount / 8;
+    public const int TetrisMaxPacketSize = TetrisMinPacketSize + TetrisStageCellCount * 4 / 8;
+    
     public const int InvalidIndex = -1;
 
     public static readonly Color[] tetrisBlockColors = new Color[]
