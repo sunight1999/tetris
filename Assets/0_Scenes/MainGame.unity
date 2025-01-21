@@ -1572,6 +1572,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tetrisBlockArray:
   - <Name>k__BackingField: '|'
+    <ID>k__BackingField: 0
     <BlockColor>k__BackingField: 2
     <BlockImage>k__BackingField: {fileID: 21300000, guid: 0f832bf704ecde846a5f6882a8545cd0, type: 3}
     <BlockShapes>k__BackingField:
@@ -1579,6 +1580,7 @@ MonoBehaviour:
       height: 0
       width: 0
   - <Name>k__BackingField: -L
+    <ID>k__BackingField: 1
     <BlockColor>k__BackingField: 3
     <BlockImage>k__BackingField: {fileID: 21300000, guid: 12b762050021e2740ad614f22914c864, type: 3}
     <BlockShapes>k__BackingField:
@@ -1586,6 +1588,7 @@ MonoBehaviour:
       height: 0
       width: 0
   - <Name>k__BackingField: L
+    <ID>k__BackingField: 2
     <BlockColor>k__BackingField: 4
     <BlockImage>k__BackingField: {fileID: 21300000, guid: 891e96b9d024c1f4b8f6e500f34a83ed, type: 3}
     <BlockShapes>k__BackingField:
@@ -1593,6 +1596,7 @@ MonoBehaviour:
       height: 0
       width: 0
   - <Name>k__BackingField: "\u3141"
+    <ID>k__BackingField: 3
     <BlockColor>k__BackingField: 5
     <BlockImage>k__BackingField: {fileID: 21300000, guid: 1c2f9678c91230d4eaff94a3e0eda59b, type: 3}
     <BlockShapes>k__BackingField:
@@ -1600,6 +1604,7 @@ MonoBehaviour:
       height: 0
       width: 0
   - <Name>k__BackingField: -Z
+    <ID>k__BackingField: 4
     <BlockColor>k__BackingField: 6
     <BlockImage>k__BackingField: {fileID: 21300000, guid: 7ee19f5727e2b75409b7590d7307ff6a, type: 3}
     <BlockShapes>k__BackingField:
@@ -1607,6 +1612,7 @@ MonoBehaviour:
       height: 0
       width: 0
   - <Name>k__BackingField: Z
+    <ID>k__BackingField: 5
     <BlockColor>k__BackingField: 7
     <BlockImage>k__BackingField: {fileID: 21300000, guid: ca4d24387bbecd341a0e1fee3ea63208, type: 3}
     <BlockShapes>k__BackingField:
@@ -1614,6 +1620,7 @@ MonoBehaviour:
       height: 0
       width: 0
   - <Name>k__BackingField: "\u315C"
+    <ID>k__BackingField: 6
     <BlockColor>k__BackingField: 8
     <BlockImage>k__BackingField: {fileID: 21300000, guid: db95cba67c6c83f4ab61ea0e9c26503a, type: 3}
     <BlockShapes>k__BackingField:

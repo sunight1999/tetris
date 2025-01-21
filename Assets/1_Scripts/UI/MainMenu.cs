@@ -31,12 +31,17 @@ public class MainMenu : MonoBehaviourPunCallbacks
         if (!isConnecting)
             return;
 
-        PhotonNetwork.JoinRandomOrCreateRoom();
+        PhotonNetwork.JoinLobby();
     }
 
     public override void OnDisconnected(DisconnectCause cause)
     {
         SetControlPanelVisibility(true);
+    }
+
+    public override void OnJoinedLobby()
+    {
+        PhotonNetwork.JoinRandomOrCreateRoom(roomName:"TETRIS");
     }
 
     public override void OnJoinedRoom()

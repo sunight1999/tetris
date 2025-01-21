@@ -51,6 +51,7 @@ public class TetrisPlayer : MonoBehaviourPun, IPunInstantiateMagicCallback
     public void OnEndGame()
     {
         stage.OnGameEnd();
+        SetReady(false);
     }
 
     public void Init(PlayerInitData playerInitData)
@@ -79,16 +80,16 @@ public class TetrisPlayer : MonoBehaviourPun, IPunInstantiateMagicCallback
         }
     }
 
+    [PunRPC]
     public void Win()
     {
         stateInfo.SetWin();
-        stage.OnGameEnd();
     }
 
+    [PunRPC]
     public void Lose()
     {
         stateInfo.SetLose();
-        stage.OnGameEnd();
     }
     
     public void Attack(int obstacleNum)

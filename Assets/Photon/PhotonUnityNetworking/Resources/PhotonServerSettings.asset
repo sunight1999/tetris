@@ -28,7 +28,7 @@ MonoBehaviour:
     AuthMode: 0
     EnableLobbyStatistics: 0
     NetworkLogging: 5
-  DevRegion: 
+  DevRegion: hk
   PunLogging: 2
   EnableSupportLogger: 0
   RunInBackground: 1
@@ -37,9 +37,11 @@ MonoBehaviour:
   - ClickRpc
   - DestroyRpc
   - DestroySpaceship
-  - Fire
   - RespawnSpaceship
+  - Fire
   - Hit
+  - Lose
+  - Win
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

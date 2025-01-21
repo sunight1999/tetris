@@ -8,6 +8,9 @@ public class TetrisBlock
 {
     [field: SerializeField]
     public string Name { get; private set; } = string.Empty;
+
+    [field: SerializeField]
+    public int ID { get; private set; } = 0;
     
     [field: SerializeField]
     public TetrisBlockColorType BlockColor { get; private set; } = TetrisBlockColorType.Normal;

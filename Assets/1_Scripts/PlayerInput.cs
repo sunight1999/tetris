@@ -51,6 +51,8 @@ public class PlayerInput : MonoBehaviour
             {
                 tetrisPlayer.SetReady(true);
             }
+
+            return;
         }
         
         if (Input.GetKeyDown(LeftKey))

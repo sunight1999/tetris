@@ -69,6 +69,8 @@ public class Stage : MonoBehaviourPun, IPunObservable
 
         if (stream.IsWriting)
         {
+            stream.SendNext(nextBlock != null ? (byte)nextBlock.ID : byte.MaxValue);
+            stream.SendNext(holdBlock != null ? (byte)holdBlock.ID : byte.MaxValue);
             stream.SendNext(StageDataSerializer.Serialize(stageArray));
         }
         else
@@ -76,6 +78,8 @@ public class Stage : MonoBehaviourPun, IPunObservable
             if (assignedPlayer.IsLocal)
                 return;
             
+            SetNextBlockImage((byte)stream.ReceiveNext());
+            SetHoldBlockImage((byte)stream.ReceiveNext());
             StageData[] receivedStageDataArray = StageDataSerializer.Deserialize((byte[])stream.ReceiveNext());
             if (receivedStageDataArray != null)
             {
@@ -149,8 +153,13 @@ public class Stage : MonoBehaviourPun, IPunObservable
     private IEnumerator StageUpdateCoroutine()
     {
         // 시작 맵 및 블록 구성
-        AddObstacleLines(3);
-        CreateBlock();
+        //AddObstacleLines(3);
+
+        if (!CreateBlock())
+        {
+            GameManager.Instance.SetLose(assignedPlayer);
+            yield break;
+        }
         
         while (GameManager.Instance.GameState == GameState.Playing)
         {
@@ -176,7 +185,7 @@ public class Stage : MonoBehaviourPun, IPunObservable
                     currentHighestY = currentBlockY;
 
                     // 블록이 천장에 닿아 게임 오버 
-                    if (currentHighestY == 0)
+                    if (currentHighestY <= 0)
                     {
                         GameManager.Instance.SetLose(assignedPlayer);
                         break;
@@ -228,6 +237,9 @@ public class Stage : MonoBehaviourPun, IPunObservable
     
     public void TryRotateBlock()
     {
+        if (!isPlacing)
+            return;
+        
         int nextRotation = (currentBlockRotation + 1) % TetrisDefine.TetrisBlockMaxRotation;
         TetrisBlock.BlockShape rotatedBlockShape = currentBlock.BlockShapes[nextRotation];
         
@@ -283,14 +295,17 @@ public class Stage : MonoBehaviourPun, IPunObservable
             DrawStep();
         }
 
-        holdBlockInfoUI.BlockImage.sprite = holdBlock.BlockImage;
+        SetHoldBlockImage(holdBlock.ID);
     }
     
     public void DropBlock()
     {
+        if (!isPlacing)
+            return;
+        
         // 현재 위치에서부터 블록을 배치할 수 있는 위치 탐색
-        int i = currentBlockY; 
-        for (; i < TetrisDefine.TetrisStageRows - CurrentBlockShape.height; i++)
+        int i = currentBlockY;
+        for (; i <= TetrisDefine.TetrisStageRows - CurrentBlockShape.height; i++)
         {
             if (CheckCollision(currentBlock, currentBlockX, i, currentBlockRotation))
             {
@@ -298,17 +313,14 @@ public class Stage : MonoBehaviourPun, IPunObservable
             }
         }
         
-        // 드랍 위치가 현재 위치와 동일하지 않은 경우, i가 충돌이 감지된 위치이므로 -1 수행
-        if (i != currentBlockY)
-        {
-            currentBlockY = i - 1;
-        }
+        // i가 충돌이 감지된 위치이므로 -1 수행
+        currentBlockY = i - 1;
         
         ClearPreviousStep();
         DrawStep();
     }
 
-    private void CreateBlock(TetrisBlock targetBlock = null)
+    private bool CreateBlock(TetrisBlock targetBlock = null)
     {
         // 파라미터로 지정된 블록이 없다면 다음 블록이나 랜덤 블록 사용
         if (targetBlock == null)
@@ -318,14 +330,18 @@ public class Stage : MonoBehaviourPun, IPunObservable
         
         currentBlock = targetBlock;
         nextBlock = TetrisDefine.Instance.GetRandomTetrisBlock();
-        nextBlockInfoUI.BlockImage.sprite = nextBlock.BlockImage;
+        SetNextBlockImage(nextBlock.ID);
         
         currentBlockX = createPositionX;
         currentBlockY = 0;
         currentBlockRotation = 0;
         isPlacing = true;
 
+        if (CheckCollision(currentBlock, currentBlockX, currentBlockY, currentBlockRotation))
+            return false;
+        
         DrawStep();
+        return true;
     }
 
     private void DrawStep()
@@ -334,7 +350,13 @@ public class Stage : MonoBehaviourPun, IPunObservable
         for (int i = 0; i < CurrentBlockShape.height; i++)
         {
             int offset = TetrisDefine.TetrisStageCols * (currentBlockY + i);
-
+            
+            // 블록이 -1 지점에서 생성되므로 해당 시점에 드롭을 수행하면 offset이 -가 될 수도 있음
+            if (offset < 0)
+            {
+                continue;
+            }
+            
             for (int j = 0; j < TetrisDefine.TetrisBlockCols; j++)
             {
                 if (!CurrentBlockShape.shape[(i * TetrisDefine.TetrisBlockCols) + j])
@@ -391,6 +413,22 @@ public class Stage : MonoBehaviourPun, IPunObservable
         }
 
         return false;
+    }
+
+    private void SetNextBlockImage(int tetrisBlockIndex)
+    {
+        if (tetrisBlockIndex >= TetrisDefine.Instance.tetrisBlockArray.Length)
+            return;
+        
+        nextBlockInfoUI.BlockImage.sprite = TetrisDefine.Instance.tetrisBlockArray[tetrisBlockIndex].BlockImage;
+    }
+    
+    private void SetHoldBlockImage(int tetrisBlockIndex)
+    {
+        if (tetrisBlockIndex >= TetrisDefine.Instance.tetrisBlockArray.Length)
+            return;
+        
+        holdBlockInfoUI.BlockImage.sprite = TetrisDefine.Instance.tetrisBlockArray[tetrisBlockIndex].BlockImage;
     }
 #endregion
     
