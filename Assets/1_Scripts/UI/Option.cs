@@ -1,3 +1,6 @@
+using ExitGames.Client.Photon;
+using Photon.Pun;
+using Photon.Realtime;
 using UnityEditor;
 using UnityEngine;
 
@@ -17,9 +20,10 @@ public class Option : UI
 
     public void Restart()
     {
-        if (GameManager.Instance.GameState == GameState.Playing)
+        if (GameManager.Instance.GameStatePrevPause == GameState.Playing)
         {
-            GameManager.Instance.StartGame();
+            RaiseEventOptions raiseEventOptions = new RaiseEventOptions() { Receivers = ReceiverGroup.All };
+            PhotonNetwork.RaiseEvent((byte)TetrisEventCode.StartGameEvent, null, raiseEventOptions, SendOptions.SendReliable);
         }
     }
 

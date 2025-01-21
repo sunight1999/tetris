@@ -26,7 +26,7 @@ public class PlayerInput : MonoBehaviour
     
     [field: SerializeField]
     public KeyCode ReadyKey { get; private set;} = KeyCode.None;
-
+    
     private void Awake()
     {
         tetrisPlayer = GetComponent<TetrisPlayer>();

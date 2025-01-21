@@ -12,7 +12,6 @@ using Hashtable = ExitGames.Client.Photon.Hashtable;
 public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEventCallback
 {
     public event Action StartGameEvent;
-    public event Action PauseGameEvent;
     public event Action EndGameEvent;
     
     [SerializeField]
@@ -25,6 +24,7 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
     private StateInfo[] stateInfoArray = null;
 
     public GameState GameState { get; private set; } = GameState.Idle;
+    public GameState GameStatePrevPause = GameState.Idle;
 
     private void Start()
     {
@@ -67,7 +67,7 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
         if (CheckAllPlayerIsReady())
         {
             RaiseEventOptions raiseEventOptions = new RaiseEventOptions() { Receivers = ReceiverGroup.All };
-            PhotonNetwork.RaiseEvent((byte)TetrisEventCode.AllPlayerIsReadyEvent, null, raiseEventOptions, SendOptions.SendReliable);
+            PhotonNetwork.RaiseEvent((byte)TetrisEventCode.StartGameEvent, null, raiseEventOptions, SendOptions.SendReliable);
         }
     }
 
@@ -75,11 +75,11 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
     {
         switch ((TetrisEventCode)photonEvent.Code)
         {
-            case TetrisEventCode.AllPlayerIsReadyEvent:
+            case TetrisEventCode.StartGameEvent:
                 StartGame();
                 break;
             
-            case TetrisEventCode.GameEndEvent:
+            case TetrisEventCode.EndGameEvent:
                 int loserActorNumber = (int)photonEvent.CustomData;
                 foreach (Player player in PhotonNetwork.PlayerList)
                 {
@@ -89,6 +89,27 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
                         EndGame(loserPlayer);
                         break;
                     }
+                }
+                break;
+            
+            case TetrisEventCode.PauseGameEvent:
+                bool isPause = (bool)photonEvent.CustomData;
+                if (isPause)
+                {
+                    GameStatePrevPause = GameState;
+                    GameState = GameState.Pause;
+                    UIManager.Instance.SetVisibility(MenuType.Option, true);
+                }
+                else
+                {
+                    UIManager.Instance.SetVisibility(MenuType.Option, false);
+                    if (GameStatePrevPause == GameState.Playing)
+                    {
+                        UIManager.Instance.SetVisibility(MenuType.Countdown, true);
+                        return;
+                    }
+                    
+                    GameState = GameStatePrevPause;
                 }
                 break;
         }
@@ -135,12 +156,31 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
     
     public void SetLose(Player loser)
     {
-        // 이벤트가 Raise 되기 전에 추가 입력이 들어오는 경우를 막기 위해 GameState를 Idle로 바로 변경
-        GameState = GameState.Idle;
+        PreventUnexpectedInputs();
             
         RaiseEventOptions raiseEventOptions = new RaiseEventOptions() { Receivers = ReceiverGroup.All };
-        SendOptions sendOptions = new SendOptions() { Reliability = true };
-        PhotonNetwork.RaiseEvent((byte)TetrisEventCode.GameEndEvent, loser.ActorNumber, raiseEventOptions, sendOptions);
+        PhotonNetwork.RaiseEvent((byte)TetrisEventCode.EndGameEvent, loser.ActorNumber, raiseEventOptions, SendOptions.SendReliable);
+    }
+    
+    public void SetPause(bool isPause)
+    {
+        bool isCurrentPause = GameState == GameState.Pause;
+        if (isCurrentPause == isPause)
+            return;
+
+        RaiseEventOptions raiseEventOptions = new RaiseEventOptions() { Receivers = ReceiverGroup.All };
+        PhotonNetwork.RaiseEvent((byte)TetrisEventCode.PauseGameEvent, isPause, raiseEventOptions, SendOptions.SendReliable);
+    }
+
+    public void PreventUnexpectedInputs()
+    {
+        // 이벤트가 Raise 되기 전에 추가 입력이 들어오는 경우를 막기 위해 GameState를 Idle로 바로 변경
+        GameState = GameState.Idle;
+    }
+
+    public void ResumeGame()
+    {
+        GameState = GameState.Playing;
     }
 
     private void TryCreatePlayer()
@@ -176,7 +216,7 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
     
     private void EndGame(TetrisPlayer loser)
     {
-        GameState = GameState.Idle;
+        PreventUnexpectedInputs();
 
         Player losePlayer = loser.photonView.Owner;
         Player winPlayer = PhotonNetwork.PlayerList[0] == losePlayer ? PhotonNetwork.PlayerList[1] : PhotonNetwork.PlayerList[0];

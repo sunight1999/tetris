@@ -161,10 +161,16 @@ public class Stage : MonoBehaviourPun, IPunObservable
             yield break;
         }
         
-        while (GameManager.Instance.GameState == GameState.Playing)
+        while (GameManager.Instance.GameState == GameState.Playing ||
+               GameManager.Instance.GameState == GameState.Pause)
         {
             yield return new WaitForSeconds(blockDownTime);
 
+            while (GameManager.Instance.GameState == GameState.Pause)
+            {
+                yield return new WaitForSeconds(0.1f);
+            }
+            
             // 완성된 라인을 확인하는 도중엔 다른 작업 중지
             while (!isPlacing)
             {

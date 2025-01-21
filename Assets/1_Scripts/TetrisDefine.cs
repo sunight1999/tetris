@@ -56,8 +56,9 @@ public enum TetrisBlockColorType
 
 public enum TetrisEventCode : byte
 {
-    AllPlayerIsReadyEvent,
-    GameEndEvent
+    StartGameEvent,
+    EndGameEvent,
+    PauseGameEvent,
 }
 
 public struct PlayerInitData
@@ -76,12 +77,14 @@ public struct PlayerInitData
 
 public class TetrisDefine : SingletonBehaviour<TetrisDefine>
 {
+    // 룸 커스텀 프로퍼티 키
+    public const string RoomIsPauseProperty = "RoomIsPaused";
+    
     // 플레이어 커스텀 프로퍼티 키
     public const string PlayerLoadedLevelProperty = "PlayerLoadedLevel";
     public const string PlayerIsReadyProperty = "PlayerIsReady";
     
     public const int PlayerCount = 2;
-    public const float PlayerSearchingInterval = .5f;
 
     public const int TetrisStageRows = 20;
     public const int TetrisStageCols = 10;
@@ -96,8 +99,6 @@ public class TetrisDefine : SingletonBehaviour<TetrisDefine>
     public const int TetrisMinPacketSize = TetrisStageCellCount / 8;
     public const int TetrisMaxPacketSize = TetrisMinPacketSize + TetrisStageCellCount * 4 / 8;
     
-    public const int InvalidIndex = -1;
-
     public static readonly Color[] tetrisBlockColors = new Color[]
     {
         new Color(0f, 0f, 0f, 0.5f),
