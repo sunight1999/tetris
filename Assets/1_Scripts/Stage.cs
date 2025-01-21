@@ -78,8 +78,8 @@ public class Stage : MonoBehaviourPun, IPunObservable
             if (assignedPlayer.IsLocal)
                 return;
             
-            SetNextBlockImage((byte)stream.ReceiveNext());
-            SetHoldBlockImage((byte)stream.ReceiveNext());
+            SetBlockInfoImage(nextBlockInfoUI, (byte)stream.ReceiveNext());
+            SetBlockInfoImage(holdBlockInfoUI, (byte)stream.ReceiveNext());
             StageData[] receivedStageDataArray = StageDataSerializer.Deserialize((byte[])stream.ReceiveNext());
             if (receivedStageDataArray != null)
             {
@@ -112,7 +112,7 @@ public class Stage : MonoBehaviourPun, IPunObservable
         assignedPlayer = player;
     }
 
-    private void Init()
+    public void Init()
     {
         isPlacing = false;
         currentHighestY = TetrisDefine.TetrisStageRows - 1;
@@ -128,6 +128,9 @@ public class Stage : MonoBehaviourPun, IPunObservable
         {
             StopCoroutine(coroutineStageUpdate);
         }
+        
+        SetBlockInfoImage(nextBlockInfoUI, byte.MaxValue);
+        SetBlockInfoImage(holdBlockInfoUI, byte.MaxValue);
     }
 
     private void ForceUpdateStage(StageData[] newStageDataArray)
@@ -303,7 +306,7 @@ public class Stage : MonoBehaviourPun, IPunObservable
             DrawStep();
         }
 
-        SetHoldBlockImage(holdBlock.ID);
+        SetBlockInfoImage(holdBlockInfoUI, holdBlock.ID);
     }
     
     public void DropBlock()
@@ -338,7 +341,7 @@ public class Stage : MonoBehaviourPun, IPunObservable
         
         currentBlock = targetBlock;
         nextBlock = TetrisDefine.Instance.GetRandomTetrisBlock();
-        SetNextBlockImage(nextBlock.ID);
+        SetBlockInfoImage(nextBlockInfoUI, nextBlock.ID);
         
         currentBlockX = createPositionX;
         currentBlockY = 0;
@@ -423,20 +426,15 @@ public class Stage : MonoBehaviourPun, IPunObservable
         return false;
     }
 
-    private void SetNextBlockImage(int tetrisBlockIndex)
+    private void SetBlockInfoImage(BlockInfoUI blockInfoUI, int tetrisBlockIndex)
     {
         if (tetrisBlockIndex >= TetrisDefine.Instance.tetrisBlockArray.Length)
+        {
+            blockInfoUI.BlockImage.sprite = null;
             return;
+        }
         
-        nextBlockInfoUI.BlockImage.sprite = TetrisDefine.Instance.tetrisBlockArray[tetrisBlockIndex].BlockImage;
-    }
-    
-    private void SetHoldBlockImage(int tetrisBlockIndex)
-    {
-        if (tetrisBlockIndex >= TetrisDefine.Instance.tetrisBlockArray.Length)
-            return;
-        
-        holdBlockInfoUI.BlockImage.sprite = TetrisDefine.Instance.tetrisBlockArray[tetrisBlockIndex].BlockImage;
+        blockInfoUI.BlockImage.sprite = TetrisDefine.Instance.tetrisBlockArray[tetrisBlockIndex].BlockImage;
     }
 #endregion
     

@@ -20,10 +20,10 @@ public class UIManager : SingletonBehaviour<UIManager>
 
     public void OnStartGame()
     {
-        Init();
+        Reset();
     }
 
-    public void Init()
+    public void Reset()
     {
         foreach (UI ui in managedUIArray)
         {
@@ -33,7 +33,7 @@ public class UIManager : SingletonBehaviour<UIManager>
 
     public void SetVisibility(MenuType menu, bool isVisible)
     {
-        Init();
+        Reset();
         
         managedUIArray[(int)menu].SetVisibility(isVisible);
     }

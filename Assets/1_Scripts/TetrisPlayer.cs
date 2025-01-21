@@ -28,8 +28,6 @@ public class TetrisPlayer : MonoBehaviourPun, IPunInstantiateMagicCallback
 
     private void OnDisable()
     {
-        stateInfo.Reset();
-
         GameManager.Instance.StartGameEvent -= OnStartGame;
         GameManager.Instance.EndGameEvent -= OnEndGame;
     }
@@ -60,6 +58,11 @@ public class TetrisPlayer : MonoBehaviourPun, IPunInstantiateMagicCallback
         stateInfo = playerInitData.stateInfo;
 
         stage.SetPlayer(playerInitData.player);
+        stateInfo.Init(playerInput.ReadyKey.ToString());
+    }
+
+    public void Init()
+    {
         stateInfo.Init(playerInput.ReadyKey.ToString());
     }
 

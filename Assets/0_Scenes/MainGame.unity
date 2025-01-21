@@ -6542,7 +6542,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3076039231835434050, guid: 3676a2575adbcc14896afdc1b831f6e6, type: 3}
       propertyPath: m_text
-      value: Press F1 key to ready
+      value: Waiting Tetris Player...
       objectReference: {fileID: 0}
     - target: {fileID: 3085073469433040247, guid: 3676a2575adbcc14896afdc1b831f6e6, type: 3}
       propertyPath: m_AnchorMax.y
@@ -21601,6 +21601,10 @@ PrefabInstance:
     - target: {fileID: 3074445050181780818, guid: 3676a2575adbcc14896afdc1b831f6e6, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3076039231835434050, guid: 3676a2575adbcc14896afdc1b831f6e6, type: 3}
+      propertyPath: m_text
+      value: Waiting Tetris Player...
       objectReference: {fileID: 0}
     - target: {fileID: 3085073469433040247, guid: 3676a2575adbcc14896afdc1b831f6e6, type: 3}
       propertyPath: m_AnchorMax.y

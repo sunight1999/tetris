@@ -49,6 +49,15 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         Debug.Log($"{otherPlayer.NickName}이 게임을 떠났습니다.");
+        
+        InitGame();
+    }
+
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+        TetrisPlayer masterTetrisPlayer = (TetrisPlayer)newMasterClient.TagObject;
+        masterTetrisPlayer.Init(GetPlayerInitData(newMasterClient));
+        stageArray[0].gameObject.transform.SetSiblingIndex(0);
     }
 
     public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
@@ -123,6 +132,34 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
         }
     }
 
+    public void InitGame()
+    {
+        GameState = GameState.Idle;
+        
+        UIManager.Instance.Reset();
+        
+        foreach (Stage stage in stageArray)
+        {
+            stage.Init();
+        }
+
+        foreach (StateInfo stateInfo in stateInfoArray)
+        {
+            stateInfo.Reset();
+        }
+
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            TetrisPlayer tetrisPlayer = (TetrisPlayer)player.TagObject;
+            tetrisPlayer.Init();
+            
+            player.SetCustomProperties(new Hashtable()
+            {
+                { TetrisDefine.PlayerIsReadyProperty, false }
+            });
+        }
+    }
+
     public void StartGame()
     {
         if (PhotonNetwork.IsMasterClient)
@@ -136,11 +173,9 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
         StartGameEvent?.Invoke();
     }
 
-    public void LeaveGame(GameObject player)
+    public void LeaveGame()
     {
         //EndGame(player);
-        PhotonNetwork.Destroy(player);
-        PhotonNetwork.LeaveRoom();
     }
 
     public PlayerInitData GetPlayerInitData(Player player)

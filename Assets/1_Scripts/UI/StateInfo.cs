@@ -10,6 +10,7 @@ public class StateInfo : MonoBehaviour
 
     public void Reset()
     {
+        gameObject.SetActive(true);
         readyText.text = $"Waiting TetrisPlayer...";
         readyKey = string.Empty;
     }
