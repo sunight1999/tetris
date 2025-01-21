@@ -5,6 +5,11 @@ using UnityEngine;
 public class PlayerInput : MonoBehaviour
 {
     private TetrisPlayer tetrisPlayer = null;
+    private float[] autoMoveTimeArray = new float[3];
+    private KeyCode[] autoMoveTargetKeyArray = new KeyCode[3];
+
+    [field: SerializeField]
+    public float AutoMoveDelay { get; private set; } = 0.15f;
     
     [field: SerializeField]
     public KeyCode LeftKey { get; private set;} = KeyCode.None;
@@ -38,6 +43,10 @@ public class PlayerInput : MonoBehaviour
         {
             enabled = false;
         }
+
+        autoMoveTargetKeyArray[0] = LeftKey;
+        autoMoveTargetKeyArray[1] = DownKey;
+        autoMoveTargetKeyArray[2] = RightKey;
     }
 
     private void Update()
@@ -54,18 +63,43 @@ public class PlayerInput : MonoBehaviour
 
             return;
         }
+
+        for (int i = 0; i < autoMoveTargetKeyArray.Length; i++)
+        {
+            if (Input.GetKeyDown(autoMoveTargetKeyArray[i]))
+            {
+                tetrisPlayer.Stage.TryMoveBlock((Direction)i);
+            }
+        }
         
-        if (Input.GetKeyDown(LeftKey))
-            tetrisPlayer.Stage.TryMoveBlock(Direction.Left);
-        if (Input.GetKeyDown(DownKey))
-            tetrisPlayer.Stage.TryMoveBlock(Direction.Down);
-        if (Input.GetKeyDown(RightKey))
-            tetrisPlayer.Stage.TryMoveBlock(Direction.Right);
         if (Input.GetKeyDown(RotateKey))
             tetrisPlayer.Stage.TryRotateBlock();
         if (Input.GetKeyDown(DropKey))
             tetrisPlayer.Stage.DropBlock();
         if (Input.GetKeyDown(HoldKey))
             tetrisPlayer.Stage.HoldBlock();
+
+        for (int i = 0; i < autoMoveTargetKeyArray.Length; i++)
+        {
+            if (!Input.GetKey(autoMoveTargetKeyArray[i]))
+            {
+                continue;
+            }
+
+            autoMoveTimeArray[i] += Time.deltaTime;
+            if (autoMoveTimeArray[i] >= AutoMoveDelay)
+            {
+                tetrisPlayer.Stage.TryMoveBlock((Direction)i);
+                autoMoveTimeArray[i] = 0f;
+            }
+        }
+
+        for (int i = 0; i < autoMoveTargetKeyArray.Length; i++)
+        {
+            if (Input.GetKeyUp(autoMoveTargetKeyArray[i]))
+            {
+                autoMoveTimeArray[i] = 0f;
+            }
+        }
     }
 }
