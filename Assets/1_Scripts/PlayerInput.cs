@@ -42,7 +42,7 @@ public class PlayerInput : MonoBehaviour
 
     private void Update()
     {
-        if (GameManager.Instance.GameState == GameState.Pause)
+        if (GameManager.Instance.GameState == GameState.OperatingPause || GameManager.Instance.GameState == GameState.Pause)
             return;
         
         if (GameManager.Instance.GameState == GameState.Idle)

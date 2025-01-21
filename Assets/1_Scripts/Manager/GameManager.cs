@@ -23,6 +23,8 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
     [SerializeField]
     private StateInfo[] stateInfoArray = null;
 
+    private bool isPausing = false;
+    
     public GameState GameState { get; private set; } = GameState.Idle;
     public GameState GameStatePrevPause = GameState.Idle;
 
@@ -96,19 +98,25 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
                 bool isPause = (bool)photonEvent.CustomData;
                 if (isPause)
                 {
-                    GameStatePrevPause = GameState;
-                    GameState = GameState.Pause;
                     UIManager.Instance.SetVisibility(MenuType.Option, true);
+
+                    if (GameState != GameState.OperatingPause)
+                    {
+                        GameStatePrevPause = GameState;
+                    }
+                    GameState = GameState.Pause;
                 }
                 else
                 {
                     UIManager.Instance.SetVisibility(MenuType.Option, false);
+                    
+                    // 플레이 도중 옵션 창을 닫으면 카운트다운 창 가시화
                     if (GameStatePrevPause == GameState.Playing)
                     {
                         UIManager.Instance.SetVisibility(MenuType.Countdown, true);
                         return;
                     }
-                    
+
                     GameState = GameStatePrevPause;
                 }
                 break;
@@ -119,16 +127,9 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
     {
         if (PhotonNetwork.IsMasterClient)
         {
-            if (PhotonNetwork.PlayerList[0].IsMasterClient)
-            {
-                stageArray[0].photonView.TransferOwnership(PhotonNetwork.PlayerList[0]);
-                stageArray[1].photonView.TransferOwnership(PhotonNetwork.PlayerList[1]);
-            }
-            else
-            {
-                stageArray[0].photonView.TransferOwnership(PhotonNetwork.PlayerList[1]);
-                stageArray[1].photonView.TransferOwnership(PhotonNetwork.PlayerList[0]);
-            }
+            int masterPlayerIndex = PhotonNetwork.PlayerList[0].IsMasterClient ? 0 : 1;
+            stageArray[0].photonView.TransferOwnership(PhotonNetwork.PlayerList[masterPlayerIndex]);
+            stageArray[1].photonView.TransferOwnership(PhotonNetwork.PlayerList[(masterPlayerIndex + 1) % 2]);
         }
         
         GameState = GameState.Playing;
@@ -144,14 +145,8 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
 
     public PlayerInitData GetPlayerInitData(Player player)
     {
-        if (player.IsMasterClient)
-        {
-            return new PlayerInitData(player, stageArray[0], stateInfoArray[0]);
-        }
-        else
-        {
-            return new PlayerInitData(player, stageArray[1], stateInfoArray[1]);
-        }
+        int targetIndex = player.IsMasterClient ? 0 : 1;
+        return new PlayerInitData(player, stageArray[targetIndex], stateInfoArray[targetIndex]);
     }
     
     public void SetLose(Player loser)
@@ -164,10 +159,15 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
     
     public void SetPause(bool isPause)
     {
-        bool isCurrentPause = GameState == GameState.Pause;
-        if (isCurrentPause == isPause)
+        if (GameState == GameState.OperatingPause)
             return;
 
+        if (isPause)
+        {
+            GameStatePrevPause = GameState;
+        }
+        GameState = GameState.OperatingPause;
+        
         RaiseEventOptions raiseEventOptions = new RaiseEventOptions() { Receivers = ReceiverGroup.All };
         PhotonNetwork.RaiseEvent((byte)TetrisEventCode.PauseGameEvent, isPause, raiseEventOptions, SendOptions.SendReliable);
     }

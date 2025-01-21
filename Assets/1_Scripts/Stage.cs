@@ -162,11 +162,13 @@ public class Stage : MonoBehaviourPun, IPunObservable
         }
         
         while (GameManager.Instance.GameState == GameState.Playing ||
+               GameManager.Instance.GameState == GameState.OperatingPause ||
                GameManager.Instance.GameState == GameState.Pause)
         {
             yield return new WaitForSeconds(blockDownTime);
 
-            while (GameManager.Instance.GameState == GameState.Pause)
+            while (GameManager.Instance.GameState == GameState.OperatingPause ||
+                   GameManager.Instance.GameState == GameState.Pause)
             {
                 yield return new WaitForSeconds(0.1f);
             }

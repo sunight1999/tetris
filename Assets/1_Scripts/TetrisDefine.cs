@@ -15,6 +15,7 @@ public enum GameState
 {
     Idle,
     Playing,
+    OperatingPause,
     Pause
 }
 
