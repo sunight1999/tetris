@@ -80,7 +80,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98f7f4bf7f486524bb439c80aa9e997d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <AutoMoveDelay>k__BackingField: 0.1
+  <AutoMoveDelay>k__BackingField: 0.15
   <LeftKey>k__BackingField: 276
   <DownKey>k__BackingField: 274
   <RightKey>k__BackingField: 275

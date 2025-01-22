@@ -1007,7 +1007,7 @@ MonoBehaviour:
   nextBlockInfoUI: {fileID: 2832337152114193305}
   holdBlockInfoUI: {fileID: 5274681692344915658}
   createPositionX: 4
-  blockDownTime: 2
+  blockDownTime: 0.5
   lineCompleteTime: 0.5
 --- !u!1 &4480331237155440523
 GameObject:

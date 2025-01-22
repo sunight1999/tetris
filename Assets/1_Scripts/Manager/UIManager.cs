@@ -1,6 +1,3 @@
-using System;
-using ExitGames.Client.Photon;
-using Photon.Pun;
 using UnityEngine;
 
 public class UIManager : SingletonBehaviour<UIManager>

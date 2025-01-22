@@ -1,10 +1,8 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Random = System.Random;
 
 public class Stage : MonoBehaviourPun, IPunObservable

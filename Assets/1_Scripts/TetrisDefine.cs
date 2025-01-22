@@ -1,7 +1,5 @@
-using System;
 using Photon.Realtime;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Random = System.Random;
 
 public enum Direction

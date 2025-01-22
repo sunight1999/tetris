@@ -1,8 +1,6 @@
 using System.Collections;
-using Photon.Pun;
 using TMPro;
 using UnityEngine;
-using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class Countdown : UI
 {
