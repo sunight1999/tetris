@@ -105,10 +105,10 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
             
             case TetrisEventCode.PauseGameEvent:
                 bool isPause = (bool)photonEvent.CustomData;
+                UIManager.Instance.SetVisibility(MenuType.Option, isPause);
+                
                 if (isPause)
                 {
-                    UIManager.Instance.SetVisibility(MenuType.Option, true);
-
                     if (GameState != GameState.OperatingPause)
                     {
                         GameStatePrevPause = GameState;
@@ -117,15 +117,12 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
                 }
                 else
                 {
-                    UIManager.Instance.SetVisibility(MenuType.Option, false);
-                    
                     // 플레이 도중 옵션 창을 닫으면 카운트다운 창 가시화
                     if (GameStatePrevPause == GameState.Playing)
                     {
                         UIManager.Instance.SetVisibility(MenuType.Countdown, true);
                         return;
                     }
-
                     GameState = GameStatePrevPause;
                 }
                 break;
@@ -171,11 +168,6 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
         
         GameState = GameState.Playing;
         StartGameEvent?.Invoke();
-    }
-
-    public void LeaveGame()
-    {
-        //EndGame(player);
     }
 
     public PlayerInitData GetPlayerInitData(Player player)
@@ -233,7 +225,12 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
 
     private bool CheckAllPlayerIsReady()
     {
-        foreach (Player player in PhotonNetwork.PlayerList)
+        Player[] playerList = PhotonNetwork.PlayerList;
+
+        if (playerList.Length != TetrisDefine.PlayerCount)
+            return false;
+        
+        foreach (Player player in playerList)
         {
             if (player.CustomProperties.TryGetValue(TetrisDefine.PlayerIsReadyProperty, out object readyValue))
             {

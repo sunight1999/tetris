@@ -38,6 +38,14 @@ public class TetrisPlayer : MonoBehaviourPun, IPunInstantiateMagicCallback
 
         PlayerInitData playerInitData = GameManager.Instance.GetPlayerInitData(info.Sender);
         Init(playerInitData);
+
+        if (info.Sender.CustomProperties.TryGetValue(TetrisDefine.PlayerIsReadyProperty, out object isReadyValue))
+        {
+            if ((bool)isReadyValue)
+            {
+                SetReadyUI(true);
+            }
+        }
     }
 
     public void OnStartGame()
