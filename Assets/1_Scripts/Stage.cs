@@ -55,7 +55,7 @@ public class Stage : MonoBehaviourPun, IPunObservable
         {
             if (assignedTetrisPlayer == null)
             {
-                assignedTetrisPlayer = (TetrisPlayer)assignedPlayer.TagObject;
+                assignedTetrisPlayer = assignedPlayer.GetTetrisPlayer();
             }
 
             return assignedTetrisPlayer;

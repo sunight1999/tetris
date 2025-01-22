@@ -113,7 +113,7 @@ public class TetrisPlayer : MonoBehaviourPun, IPunInstantiateMagicCallback
             if (!player.IsLocal)
             {
                 // 로컬에선 다른 플레이어의 HitQueue를 직접 처리하지 않고 스테이지 정보를 통째로 받아오므로 RpcTarget.Others 사용
-                TetrisPlayer tetrisPlayer = (TetrisPlayer)player.TagObject;
+                TetrisPlayer tetrisPlayer = player.GetTetrisPlayer();
                 tetrisPlayer.photonView.RPC("Hit", RpcTarget.Others, obstacleNum);
                 break;
             }

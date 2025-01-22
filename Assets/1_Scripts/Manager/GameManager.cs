@@ -53,7 +53,7 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
 
     public override void OnMasterClientSwitched(Player newMasterClient)
     {
-        TetrisPlayer masterTetrisPlayer = (TetrisPlayer)newMasterClient.TagObject;
+        TetrisPlayer masterTetrisPlayer = newMasterClient.GetTetrisPlayer();
         masterTetrisPlayer.Init(GetPlayerInitData(newMasterClient));
         stageArray[0].gameObject.transform.SetSiblingIndex(0);
     }
@@ -62,8 +62,7 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
     {
         if (changedProps.TryGetValue(TetrisDefine.PlayerIsReadyProperty, out object isReadyValue))
         {
-            TetrisPlayer tetrisPlayer = (TetrisPlayer)targetPlayer.TagObject;
-
+            TetrisPlayer tetrisPlayer = targetPlayer.GetTetrisPlayer();
             if ((bool)isReadyValue)
             {
                 tetrisPlayer.SetReadyUI((bool)isReadyValue);
@@ -94,7 +93,7 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
                 {
                     if (player.ActorNumber == loserActorNumber)
                     {
-                        TetrisPlayer loserPlayer = (TetrisPlayer)player.TagObject;
+                        TetrisPlayer loserPlayer = player.GetTetrisPlayer();
                         EndGame(loserPlayer);
                         break;
                     }
@@ -145,7 +144,7 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
 
         foreach (Player player in PhotonNetwork.PlayerList)
         {
-            TetrisPlayer tetrisPlayer = (TetrisPlayer)player.TagObject;
+            TetrisPlayer tetrisPlayer = player.GetTetrisPlayer();
             tetrisPlayer.Init();
             
             player.SetCustomProperties(new Hashtable()
@@ -250,7 +249,7 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
 
         Player losePlayer = loser.photonView.Owner;
         Player winPlayer = PhotonNetwork.PlayerList[0] == losePlayer ? PhotonNetwork.PlayerList[1] : PhotonNetwork.PlayerList[0];
-        TetrisPlayer winner = (TetrisPlayer)winPlayer.TagObject;
+        TetrisPlayer winner = winPlayer.GetTetrisPlayer();
         
         loser.photonView.RPC("Lose", RpcTarget.All);
         winner.photonView.RPC("Win", RpcTarget.All);
