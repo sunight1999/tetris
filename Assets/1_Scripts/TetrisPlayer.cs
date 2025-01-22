@@ -6,11 +6,11 @@ using UnityEngine;
 
 public class TetrisPlayer : MonoBehaviourPun, IPunInstantiateMagicCallback 
 {
+    public Queue<int> HitQueue = new Queue<int>();
+    
     private Stage stage = null;
     private PlayerInput playerInput = null;
     private StateInfo stateInfo = null;
-
-    public Queue<int> HitQueue = new Queue<int>();
 
     public Stage Stage => stage;
     
