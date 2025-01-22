@@ -315,18 +315,22 @@ public class Stage : MonoBehaviourPun, IPunObservable
             return;
         
         // 현재 위치에서부터 블록을 배치할 수 있는 위치 탐색
-        int i = currentBlockY;
-        for (; i <= TetrisDefine.TetrisStageRows - CurrentBlockShape.height; i++)
+        int targetY = currentBlockY;
+        if (targetY >= 0)
         {
-            if (CheckCollision(currentBlock, currentBlockX, i, currentBlockRotation))
+            for (; targetY <= TetrisDefine.TetrisStageRows - CurrentBlockShape.height; targetY++)
             {
-                break;
+                if (CheckCollision(currentBlock, currentBlockX, targetY, currentBlockRotation))
+                {
+                    break;
+                }
             }
+        
+            // targetY가 충돌이 감지된 위치이므로 -1 수행
+            --targetY;
         }
-        
-        // i가 충돌이 감지된 위치이므로 -1 수행
-        currentBlockY = i - 1;
-        
+
+        currentBlockY = targetY;
         ClearPreviousStep();
         DrawStep();
     }
