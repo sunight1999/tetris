@@ -393,10 +393,22 @@ public class Stage : MonoBehaviourPun, IPunObservable
 
     private void DrawStep()
     {
-        // 현재 블록의 위치를 스테이지에 표시
+        // 블록이 떨어질 위치의 y값 계산
+        int predictY = currentBlockY;
+        for (; predictY <= TetrisDefine.TetrisStageRows - CurrentBlockShape.height; predictY++)
+        {
+            if (CheckCollision(currentBlock, currentBlockX, predictY, currentBlockRotation))
+            {
+                break;
+            }
+        }
+        --predictY;
+        
+        // 현재 블록의 위치와 떨어질 위치를 스테이지에 표시
         for (int i = 0; i < CurrentBlockShape.height; i++)
         {
             int offset = TetrisDefine.TetrisStageCols * (currentBlockY + i);
+            int predictOffset = TetrisDefine.TetrisStageCols * (predictY + i);
             
             // 블록이 -1 지점에서 생성되므로 해당 시점에 드롭을 수행하면 offset이 -가 될 수도 있음
             if (offset < 0)
@@ -411,8 +423,14 @@ public class Stage : MonoBehaviourPun, IPunObservable
                     continue;
                 }
 
+                // 떨어질 위치 표시
+                StageCell predictStageCell = stageArray[predictOffset + currentBlockX + j];
+                predictStageCell.SetPredictBlock(currentBlock);
+                previousStepCellList.Add(predictStageCell);
+                
+                // 현재 위치 표시 (떨어질 위치와 겹칠 경우 덮어쓰기 진행)
                 StageCell stageCell = stageArray[offset + currentBlockX + j];
-                stageCell.SetBlockTemporarily(currentBlock);
+                stageCell.SetTemporaryBlock(currentBlock);
                 previousStepCellList.Add(stageCell);
             }
         }

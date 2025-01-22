@@ -26,11 +26,19 @@ public class StageCell : MonoBehaviour
         IsTemporarilyBlocked = false;
     }
     
-    public void SetBlockTemporarily(TetrisBlock block)
+    public void SetTemporaryBlock(TetrisBlock block)
     {
         IsTemporarilyBlocked = true;
         TetrisBlockColor = block.BlockColor;
         cellImage.color = TetrisDefine.tetrisBlockColors[(int)block.BlockColor];
+    }
+
+    public void SetPredictBlock(TetrisBlock block)
+    {
+        TetrisBlockColor = block.BlockColor;
+        Color color = TetrisDefine.tetrisBlockColors[(int)block.BlockColor];
+        color.a = .4f;
+        cellImage.color = color;
     }
 
     public void SetBlock(TetrisBlock block)
