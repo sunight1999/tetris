@@ -123,7 +123,7 @@ public class StageDataSerializer
                 tetrisBlockColorIndex |= bit << j;
             }
 
-            stageData.isBlocked = isBlocked;
+            stageData.isBlocked = true;
             stageData.blockColorType = (TetrisBlockColorType)tetrisBlockColorIndex;
         }
 

@@ -23,10 +23,8 @@ public class GameManager : SingletonBehaviourPunCallbacks<GameManager>, IOnEvent
     [SerializeField]
     private StateInfo[] stateInfoArray = null;
 
-    private bool isPausing = false;
-    
     public GameState GameState { get; private set; } = GameState.Idle;
-    public GameState GameStatePrevPause = GameState.Idle;
+    public GameState GameStatePrevPause { get; private set; } = GameState.Idle;
 
     private void Start()
     {

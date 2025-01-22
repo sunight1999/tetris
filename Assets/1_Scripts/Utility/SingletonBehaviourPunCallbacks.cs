@@ -23,6 +23,8 @@ public class SingletonBehaviourPunCallbacks<T> : MonoBehaviourPunCallbacks where
         }
     }
 
+    public static bool IsAlive => instance != null;
+
     protected virtual void Awake()
     {
         if (instance == null)

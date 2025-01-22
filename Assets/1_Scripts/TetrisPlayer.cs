@@ -28,8 +28,11 @@ public class TetrisPlayer : MonoBehaviourPun, IPunInstantiateMagicCallback
 
     private void OnDisable()
     {
-        GameManager.Instance.StartGameEvent -= OnStartGame;
-        GameManager.Instance.EndGameEvent -= OnEndGame;
+        if (GameManager.IsAlive)
+        {
+            GameManager.Instance.StartGameEvent -= OnStartGame;
+            GameManager.Instance.EndGameEvent -= OnEndGame;
+        }
     }
 
     public void OnPhotonInstantiate(PhotonMessageInfo info)

@@ -21,6 +21,8 @@ public class SingletonBehaviour<T> : MonoBehaviour where T : MonoBehaviour
             return instance;
         }
     }
+    
+    public static bool IsAlive => instance != null;
 
     protected virtual void Awake()
     {

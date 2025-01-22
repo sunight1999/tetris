@@ -15,7 +15,10 @@ public class UIManager : SingletonBehaviour<UIManager>
 
     private void OnDestroy()
     {
-        GameManager.Instance.StartGameEvent -= OnStartGame;
+        if (GameManager.IsAlive)
+        {
+            GameManager.Instance.StartGameEvent -= OnStartGame;
+        }
     }
 
     public void OnStartGame()

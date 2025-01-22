@@ -257,20 +257,50 @@ public class Stage : MonoBehaviourPun, IPunObservable
         int rotatedBlockX = currentBlockX;
         int rotatedBlockY = currentBlockY;
 
-        // 벽 가까이에서 회전할 경우 위치 보정
-        if (rotatedBlockX + rotatedBlockShape.width >= TetrisDefine.TetrisStageCols)
-        {
-            rotatedBlockX = TetrisDefine.TetrisStageCols - rotatedBlockShape.width;
-        }
-
+        // 바닥 가까이에서 회전할 경우 위치 보정
         if (rotatedBlockY + rotatedBlockShape.height >= TetrisDefine.TetrisStageRows)
         {
             rotatedBlockY = TetrisDefine.TetrisStageRows - rotatedBlockShape.height;
         }
         
-        // 회전 위치에 대해 충돌 검사 진행
-        if (CheckCollision(currentBlock, rotatedBlockX, rotatedBlockY, nextRotation))
+        // 회전 위치에 대해 충돌 검사 및 x값 보정 진행
+        // 현재 위치에서
+        int deltaX = 1;
+        int adjustedRotatedBlockX = rotatedBlockX;
+        while (true)
+        {
+            int offset = rotatedBlockY * TetrisDefine.TetrisStageCols;
+            bool isInnerStage = adjustedRotatedBlockX >= 0 && adjustedRotatedBlockX < TetrisDefine.TetrisStageCols;
+            bool isSpaceAvailable = offset < 0 || !stageArray[offset + adjustedRotatedBlockX].IsBlocked;
+
+            if (!isInnerStage || !isSpaceAvailable)
+            {
+                // 이미 좌우 모두 검사를 끝낸 경우 rotate 불가능 판정
+                if (deltaX == -1)
+                {
+                    return;
+                }
+
+                deltaX = -1;
+                adjustedRotatedBlockX = rotatedBlockX + deltaX;
+                isInnerStage = adjustedRotatedBlockX >= 0 && adjustedRotatedBlockX < TetrisDefine.TetrisStageCols;
+                isSpaceAvailable = !stageArray[offset + adjustedRotatedBlockX].IsBlocked;
+            }
+            
+            if (isInnerStage && isSpaceAvailable)
+            {
+                if (CheckCollision(currentBlock, adjustedRotatedBlockX, rotatedBlockY, nextRotation))
+                {
+                    adjustedRotatedBlockX += deltaX;
+                    continue;
+                }
+
+                rotatedBlockX = adjustedRotatedBlockX;
+                break;
+            }
+
             return;
+        }
         
         // 현재 블록 정보를 회전한 블록으로 업데이트
         currentBlockX = rotatedBlockX;
@@ -316,19 +346,16 @@ public class Stage : MonoBehaviourPun, IPunObservable
         
         // 현재 위치에서부터 블록을 배치할 수 있는 위치 탐색
         int targetY = currentBlockY;
-        if (targetY >= 0)
+        for (; targetY <= TetrisDefine.TetrisStageRows - CurrentBlockShape.height; targetY++)
         {
-            for (; targetY <= TetrisDefine.TetrisStageRows - CurrentBlockShape.height; targetY++)
+            if (CheckCollision(currentBlock, currentBlockX, targetY, currentBlockRotation))
             {
-                if (CheckCollision(currentBlock, currentBlockX, targetY, currentBlockRotation))
-                {
-                    break;
-                }
+                break;
             }
-        
-            // targetY가 충돌이 감지된 위치이므로 -1 수행
-            --targetY;
         }
+        
+        // targetY가 충돌이 감지된 위치이므로 -1 수행
+        --targetY;
 
         currentBlockY = targetY;
         ClearPreviousStep();
@@ -342,7 +369,7 @@ public class Stage : MonoBehaviourPun, IPunObservable
         {
             targetBlock = nextBlock ?? TetrisDefine.Instance.GetRandomTetrisBlock();
         }
-        
+
         currentBlock = targetBlock;
         nextBlock = TetrisDefine.Instance.GetRandomTetrisBlock();
         SetBlockInfoImage(nextBlockInfoUI, nextBlock.ID);
@@ -352,8 +379,13 @@ public class Stage : MonoBehaviourPun, IPunObservable
         currentBlockRotation = 0;
         isPlacing = true;
 
-        if (CheckCollision(currentBlock, currentBlockX, currentBlockY, currentBlockRotation))
+        if (currentHighestY <= 0)
             return false;
+
+        while (CheckCollision(currentBlock, currentBlockX, currentBlockY, currentBlockRotation))
+        {
+            --currentBlockY;
+        }
         
         DrawStep();
         return true;
@@ -400,10 +432,11 @@ public class Stage : MonoBehaviourPun, IPunObservable
     private bool CheckCollision(TetrisBlock block, int blockPositionX, int blockPositionY, int blockRotation)
     {
         TetrisBlock.BlockShape blockShape = block.BlockShapes[blockRotation];
-        
+
         // 검사할 위치가 스테이지를 벗어나는지 확인
+        // 스테이지 위쪽은 블록이 넘어갈 수 있으므로 검사하지 않음
         if (blockPositionX < 0 || blockPositionX + blockShape.width > TetrisDefine.TetrisStageCols ||
-            blockPositionY < 0 || blockPositionY + blockShape.height > TetrisDefine.TetrisStageRows)
+            blockPositionY + blockShape.height > TetrisDefine.TetrisStageRows)
         {
             return true;
         }
@@ -412,6 +445,11 @@ public class Stage : MonoBehaviourPun, IPunObservable
         for (int i = 0; i < blockShape.height; i++)
         {
             int offset = TetrisDefine.TetrisStageCols * (blockPositionY + i);
+            if (offset < 0)
+            {
+                continue;
+            }
+            
             for (int j = 0; j < blockShape.width; j++)
             {
                 if (!blockShape.shape[(i * TetrisDefine.TetrisBlockCols) + j])
