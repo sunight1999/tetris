@@ -39,7 +39,7 @@ public class MainMenu : MonoBehaviourPunCallbacks
 
     public override void OnJoinedLobby()
     {
-        PhotonNetwork.JoinRandomOrCreateRoom(roomName:"TETRIS");
+        PhotonNetwork.JoinRandomOrCreateRoom();
     }
 
     public override void OnJoinedRoom()
@@ -77,7 +77,7 @@ public class MainMenu : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.IsConnected)
         {
-            PhotonNetwork.JoinRandomOrCreateRoom();
+            PhotonNetwork.JoinLobby();
         }
         else
         {

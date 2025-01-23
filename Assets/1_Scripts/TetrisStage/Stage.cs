@@ -25,7 +25,7 @@ public class Stage : MonoBehaviourPun, IPunObservable
     [SerializeField]
     private float lineCompleteTime = .5f;
     
-    private bool isPlacing = false;
+    private bool isPlacingBlock = false;
     
     private TetrisBlock nextBlock = null;
     private TetrisBlock holdBlock = null;
@@ -112,7 +112,7 @@ public class Stage : MonoBehaviourPun, IPunObservable
 
     public void Init()
     {
-        isPlacing = false;
+        isPlacingBlock = false;
         currentHighestY = TetrisDefine.TetrisStageRows - 1;
         completedLineList.Clear();
         previousStepCellList.Clear();
@@ -162,20 +162,17 @@ public class Stage : MonoBehaviourPun, IPunObservable
             yield break;
         }
         
-        while (GameManager.Instance.GameState == GameState.Playing ||
-               GameManager.Instance.GameState == GameState.OperatingPause ||
-               GameManager.Instance.GameState == GameState.Pause)
+        while (GameManager.Instance.IsGameStarted)
         {
-            yield return new WaitForSeconds(blockDownTime);
-
-            while (GameManager.Instance.GameState == GameState.OperatingPause ||
-                   GameManager.Instance.GameState == GameState.Pause)
+            while (GameManager.Instance.IsGamePaused)
             {
                 yield return new WaitForSeconds(0.1f);
             }
             
+            yield return new WaitForSeconds(blockDownTime);
+            
             // 완성된 라인을 확인하는 도중엔 다른 작업 중지
-            while (!isPlacing)
+            while (!isPlacingBlock)
             {
                 yield return new WaitForSeconds(0.1f);
             }
@@ -212,7 +209,7 @@ public class Stage : MonoBehaviourPun, IPunObservable
 #region 블록 생성 및 이동, 관리
     public bool TryMoveBlock(Direction direction)
     {
-        if (!isPlacing)
+        if (!isPlacingBlock)
             return true;
 
         int nextBlockX = currentBlockX;
@@ -246,7 +243,7 @@ public class Stage : MonoBehaviourPun, IPunObservable
     
     public void TryRotateBlock()
     {
-        if (!isPlacing)
+        if (!isPlacingBlock)
             return;
         
         int nextRotation = (currentBlockRotation + 1) % TetrisDefine.TetrisBlockMaxRotation;
@@ -262,7 +259,7 @@ public class Stage : MonoBehaviourPun, IPunObservable
         }
         
         // 회전 위치에 대해 충돌 검사 및 x값 보정 진행
-        // 현재 위치에서
+        // x값 보정: 현재 위치에서 우측 또는 좌측에 블록이 존재하지 않는다면 회전된 블록이 해당 방향으로 이동했을 때 배치가 되는지 확인
         int deltaX = 1;
         int adjustedRotatedBlockX = rotatedBlockX;
         while (true)
@@ -311,7 +308,7 @@ public class Stage : MonoBehaviourPun, IPunObservable
 
     public void HoldBlock()
     {
-        if (!isPlacing)
+        if (!isPlacingBlock)
             return;
 
         ClearPreviousStep();
@@ -339,7 +336,7 @@ public class Stage : MonoBehaviourPun, IPunObservable
     
     public void DropBlock()
     {
-        if (!isPlacing)
+        if (!isPlacingBlock)
             return;
         
         // 현재 위치에서부터 블록을 배치할 수 있는 위치 탐색
@@ -375,7 +372,7 @@ public class Stage : MonoBehaviourPun, IPunObservable
         currentBlockX = createPositionX;
         currentBlockY = 0;
         currentBlockRotation = 0;
-        isPlacing = true;
+        isPlacingBlock = true;
 
         if (currentHighestY <= 0)
             return false;
@@ -538,7 +535,7 @@ public class Stage : MonoBehaviourPun, IPunObservable
 
     private void CheckCompleteAndNewLines()
     {
-        isPlacing = false;
+        isPlacingBlock = false;
         StartCoroutine(CheckCompleteAndNewLinesCoroutine());
     }
 

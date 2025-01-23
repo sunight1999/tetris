@@ -41,6 +41,7 @@ public class TetrisPlayer : MonoBehaviourPun, IPunInstantiateMagicCallback
         PlayerInitData playerInitData = GameManager.Instance.GetPlayerInitData(info.Sender);
         Init(playerInitData);
 
+        // 이미 레디한 플레이어가 있을 경우 레디 상태로 UI 처리
         if (info.Sender.CustomProperties.TryGetValue(TetrisDefine.PlayerIsReadyProperty, out object isReadyValue))
         {
             if ((bool)isReadyValue)
